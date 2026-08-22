@@ -1,0 +1,136 @@
+{
+  "$comment": "Drop this at your project root. Claude Code auto-detects it. Extracted from ADLTrack (frontend/src/context/ThemeContext.jsx + App.css) on 2026-08-18.",
+  "name": "adltrack-airbnb-inspired",
+  "version": "1.0.0",
+  "design_system": {
+    "philosophy": "Airbnb warmth on iOS bones. Calm neutral canvas, one hot coral accent used sparingly, generous radii, hairline borders instead of heavy shadows, and system-native status colors. Clarity over density. Every surface should feel touchable and trustworthy on a phone first.",
+    "typography": {
+      "font_family": "'Inter', 'Plus Jakarta Sans', -apple-system, sans-serif",
+      "import": "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap",
+      "scale": {
+        "xs": "11px — timestamps, metadata",
+        "sm": "13px — body copy, secondary labels",
+        "base": "15px — UI text, buttons",
+        "lg": "17px — section headers",
+        "xl": "20px — panel titles",
+        "2xl": "24px — page headings"
+      },
+      "weights": {
+        "body": 500,
+        "label": 600,
+        "heading": 700,
+        "emphasis": 800
+      },
+      "rules": [
+        "Headings use tracking-tight (-0.02em).",
+        "Inputs are ALWAYS >= 16px font-size to stop iOS Safari zoom-on-focus.",
+        "Uppercase micro-badges: 10px / weight 800 / letter-spacing 0.06em."
+      ]
+    },
+    "colors": {
+      "light": {
+        "bg": "#FFFFFF",
+        "card": "#FFFFFF",
+        "card2": "#F7F7F7",
+        "text": "#222222",
+        "muted": "#717171",
+        "border": "#EBEBEB",
+        "sidebar": "#FFFFFF",
+        "input_bg": "#F7F7F7",
+        "shadow": "0 2px 12px rgba(0,0,0,0.08)"
+      },
+      "dark": {
+        "bg": "#0A0A0A",
+        "card": "#141414",
+        "card2": "#1C1C1C",
+        "text": "#F5F5F5",
+        "muted": "#8A8A8A",
+        "border": "#2A2A2A",
+        "sidebar": "#111111",
+        "input_bg": "#1C1C1C",
+        "shadow": "0 2px 16px rgba(0,0,0,0.5)"
+      },
+      "brand_and_status": {
+        "$comment": "Identical in both themes so status reads the same everywhere.",
+        "primary": "#FF385C",
+        "success": "#34C759",
+        "danger": "#FF3B30",
+        "warning": "#FF9500"
+      },
+      "tinting_rule": "Never fill a surface with a saturated brand color. Tint it: `${COLOR}14` (8% alpha) for icon tiles, `${COLOR}12` for badges, `rgba(r,g,b,0.10)` for soft chips, `${COLOR}40` for the colored glow under a primary button."
+    },
+    "spacing": {
+      "scale": { "1": "8px", "2": "16px", "3": "24px", "4": "32px", "5": "48px" },
+      "container_padding": "16-20px on mobile, 24px on desktop",
+      "card_padding": "16px, or '18px 20px' for wider list cards",
+      "max_width": "1280px"
+    },
+    "shapes": {
+      "radius_scale": {
+        "badge": 6,
+        "chip": 8,
+        "icon_tile_sm": 10,
+        "icon_tile": 12,
+        "input": 12,
+        "card": 14,
+        "card_lg": 16,
+        "hero_button": 20,
+        "pill": 999,
+        "avatar": "50%"
+      },
+      "rule": "Radius scales with the element. Small controls 8-12, cards 14-16, hero CTAs 20, anything pill-shaped 999."
+    },
+    "elevation": {
+      "card": "0 2px 8px rgba(0,0,0,0.04)",
+      "raised": "0 2px 12px rgba(0,0,0,0.08)",
+      "floating": "0 8px 30px rgba(0,0,0,0.12)",
+      "primary_button_glow": "0 8px 24px ${PRIMARY}40",
+      "rule": "Structure comes from 1px hairline borders, not shadow. Shadows are a whisper — never a drop shadow you can point at. In dark mode drop shadows entirely and let the border carry it."
+    },
+    "motion": {
+      "easing": "cubic-bezier(0.22, 1, 0.36, 1)",
+      "durations": { "micro": "150ms", "standard": "220ms", "entrance": "260ms", "celebration": "900ms" },
+      "patterns": {
+        "stagger": "List children fade+rise 12px, 50ms apart, capped at 10 items",
+        "panel": "Tab/panel content fades+rises 8px on mount",
+        "press": "Nav and card press = scale(0.97)",
+        "success": "Green flash overlay, scale 0.92 -> 1, 900ms, pointer-events:none",
+        "skeleton": "1.6s shimmer sweep, theme-aware base/shine"
+      },
+      "rule": "All motion must be wrapped by prefers-reduced-motion:reduce."
+    },
+    "interaction": {
+      "touch_target": "44x44px minimum below 768px — enforced globally on button",
+      "focus_ring": "2px solid #FF385C, offset 2px, radius 6 (cards: offset 3, radius 16), :focus-visible only",
+      "hover_nav": "background rgba(255,56,92,0.06)",
+      "safe_area": "padding-bottom: max(16px, env(safe-area-inset-bottom)) on any bottom-fixed bar"
+    }
+  },
+  "component_recipes": {
+    "card": "background:CARD; border:1px solid BORDER; border-radius:14; padding:16; box-shadow:0 2px 8px rgba(0,0,0,0.04)",
+    "icon_tile": "width:44; height:44; border-radius:12; background:`${color}14`; flex-center; flex-shrink:0",
+    "primary_button": "background:PRIMARY; color:#fff; border:none; border-radius:12; padding:13px 0; font-weight:700; box-shadow:0 8px 24px ${PRIMARY}40",
+    "secondary_button": "background:CARD2; border:1px solid BORDER; border-radius:12; color:TEXT; font-weight:600",
+    "disabled_button": "background:CARD2; border:1px solid BORDER; color:MUTED; cursor:not-allowed; box-shadow:none",
+    "input": "width:100%; padding:14px 16px; background:CARD2; border-radius:12; color:TEXT; outline:none; font-size:16",
+    "status_pill": "display:inline-flex; gap:6; background:rgba(52,199,89,0.10); border:1px solid rgba(52,199,89,0.20); border-radius:999; padding:6px 14px + 7px dot with 2px glow ring",
+    "micro_badge": "font-size:10; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; border-radius:6; padding:2px 7px; tinted bg",
+    "stat_tile": "background:CARD; border:1px solid BORDER; border-radius:16; padding:16px 12px; text-align:center; 36px icon tile centered above",
+    "avatar_ring": "108px circle, padding:3, background:linear-gradient(135deg,PRIMARY,WARNING), inner circle with 3px solid CARD border, 20px status dot bottom-right"
+  },
+  "stack": {
+    "framework": "React 19 + CRA/craco (portable to Vite/Next)",
+    "styling": "Tailwind CSS + shadcn/ui (new-york, neutral base, CSS variables) + inline style objects driven by useTheme()",
+    "icons": "lucide-react — 20px inline, 24px nav, stroke default",
+    "animation": "framer-motion for layout/presence, CSS keyframes for entrance",
+    "utils": "clsx + tailwind-merge via cn()"
+  },
+  "hard_rules": [
+    "Mobile-first. Design the 375px view, then widen.",
+    "One accent color. #FF385C carries primary actions and focus only — it never becomes a background wash.",
+    "Hairline borders over shadows.",
+    "Every interactive element has a visible :focus-visible ring.",
+    "Both themes ship together — never add a color that only works in light mode.",
+    "Preserve data-testid attributes when editing existing components."
+  ]
+}

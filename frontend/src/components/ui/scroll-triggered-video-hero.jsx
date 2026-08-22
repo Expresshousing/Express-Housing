@@ -1,244 +1,151 @@
-'use client';
+import React, { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence, useScroll } from "framer-motion";
+import { ArrowDownRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import React, { useRef, useState, useEffect } from 'react';
-import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion';
-import { ChevronRight, PlayCircle } from 'lucide-react';
 
-// --- Types & Data ---
-const chapters = [
+const DEFAULT_CHAPTERS = [
   {
-    id: '01',
-    title: 'The Origin',
-    subtitle: 'Where silence begins',
-    videoUrl: '/videos/care-1.mp4',
-    webmUrl: '/videos/care-1.webm',
-    theme: 'dark',
-    description: 'The moment where motion is born from stillness. Watch the first frame of a story that has not yet been written.',
-  },
-  {
-    id: '02',
-    title: 'Velocity',
-    subtitle: 'Moving at lightspeed',
-    videoUrl: '/videos/care-2.mp4',
-    webmUrl: '/videos/care-2.webm',
-    theme: 'dark',
-    description: 'City lights blur into streaks of memory as the world accelerates around you. Every frame a new direction.',
-  },
-  {
-    id: '03',
-    title: 'Immersion',
-    subtitle: 'Beneath the surface',
-    videoUrl: '/videos/care-3.mp4',
-    webmUrl: '/videos/care-3.webm',
-    theme: 'light',
-    description: 'You drift below the noise into a quiet, weightless space. Sound fades, colors thicken, and focus returns.',
+    id: "01",
+    title: "Arrival",
+    subtitle: "The lobby",
+    posterUrl: "/images/operator-portfolio/broad-noble-lobby.jpg",
+    videoUrl: null,
+    description: "A staffed entrance and a real address — not a mailbox drop.",
   },
 ];
 
-// --- Animation Variants ---
 const textContainer = {
   hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.1 }
-  }
+  visible: { transition: { staggerChildren: 0.1 } },
 };
 
 const textReveal = {
   hidden: { y: "100%", opacity: 0 },
-  visible: { 
-    y: "0%", 
-    opacity: 1,
-    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } 
-  }
+  visible: { y: "0%", opacity: 1, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } },
 };
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.8, delay: 0.4, ease: "easeOut" } 
-  }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, delay: 0.4, ease: "easeOut" } },
 };
 
-// --- Sub-Components ---
-const FilmGrain = () => (
-  <div className="pointer-events-none absolute inset-0 z-20 opacity-[0.07] mix-blend-overlay">
-    <div
-      className="absolute inset-0 h-full w-full"
-      style={{
-        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E")`,
-        backgroundRepeat: 'repeat',
-      }}
-    />
-  </div>
-);
+function FilmGrain() {
+  return (
+    <div className="pointer-events-none absolute inset-0 z-20 opacity-[0.07] mix-blend-overlay">
+      <div
+        className="absolute inset-0 h-full w-full"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E")`,
+          backgroundRepeat: "repeat",
+        }}
+      />
+    </div>
+  );
+}
 
-const VideoBackground = ({ currentChapterIndex }) => {
+function ChapterMedia({ chapters, activeIndex }) {
   return (
     <div className="absolute inset-0 h-full w-full overflow-hidden bg-black">
       {chapters.map((chapter, index) => (
         <motion.div
           key={chapter.id}
           initial={{ opacity: 0 }}
-          animate={{
-            opacity: index === currentChapterIndex ? 1 : 0,
-            zIndex: index === currentChapterIndex ? 10 : 0, 
-          }}
+          animate={{ opacity: index === activeIndex ? 1 : 0, zIndex: index === activeIndex ? 10 : 0 }}
           transition={{ duration: 1.2, ease: "easeInOut" }}
           className="absolute inset-0 h-full w-full"
         >
-          <video
-            className="h-full w-full object-cover"
-            autoPlay
-            muted
-            loop
-            playsInline
-          >
-            <source src={chapter.videoUrl} type="video/mp4" />
-            <source src={chapter.webmUrl} type="video/webm" />
-          </video>
-          <div className="absolute inset-0 bg-black/40" />
+          {chapter.videoUrl ? (
+            <video src={chapter.videoUrl} poster={chapter.posterUrl} className="h-full w-full object-cover" autoPlay muted loop playsInline />
+          ) : (
+            <motion.img
+              src={chapter.posterUrl}
+              alt={chapter.subtitle}
+              className="h-full w-full object-cover"
+              loading={index === 0 ? "eager" : "lazy"}
+              fetchPriority={index === 0 ? "high" : "auto"}
+              initial={{ scale: 1 }}
+              animate={{ scale: index === activeIndex ? 1.08 : 1 }}
+              transition={{ duration: 8, ease: "linear" }}
+            />
+          )}
+          <div className="absolute inset-0 bg-black/35" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/45" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/45 via-transparent to-transparent" />
         </motion.div>
       ))}
       <FilmGrain />
     </div>
   );
-};
+}
 
-const DynamicNav = ({
-  activeIndex,
-  progress
-}) => {
-  const smoothProgress = useSpring(progress, { stiffness: 100, damping: 30 });
+function TourNav({ chapters, activeIndex, accentColor }) {
   return (
-    <motion.div
-      className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 rounded-full bg-black/80 backdrop-blur-xl border border-white/10 p-2 pl-6 pr-2 shadow-2xl"
-      initial={{ y: 100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ delay: 0.5 }}
-    >
-      <div className="flex flex-col">
-        <span className="text-[10px] uppercase tracking-widest text-white/50">
-          Chapter {chapters[activeIndex].id}
-        </span>
-        <AnimatePresence mode="wait">
-          <motion.span
-            key={activeIndex}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="text-xs font-bold text-white min-w-[100px]"
-          >
-            {chapters[activeIndex].title}
-          </motion.span>
-        </AnimatePresence>
-      </div>
-      <div className="relative h-12 w-12 flex items-center justify-center">
-        <svg className="h-full w-full -rotate-90 transform">
-          <circle cx="24" cy="24" r="18" className="stroke-white/10" strokeWidth="2" fill="none" />
-          <motion.circle
-            cx="24" cy="24" r="18"
-            className="stroke-indigo-500"
-            strokeWidth="2"
-            fill="none"
-            strokeDasharray="113"
-            style={{ pathLength: smoothProgress }}
-          />
-        </svg>
-        <div className="absolute inset-0 flex items-center justify-center text-white">
-          <PlayCircle size={16} fill="white" className="text-black" />
+    <div className="absolute inset-x-0 bottom-0 z-50 px-5 pb-5 text-white sm:px-8 sm:pb-7 lg:px-12">
+      <div className="mx-auto flex max-w-[1440px] items-end justify-between gap-6">
+        <div className="hidden rounded-full bg-black/55 px-4 py-3 backdrop-blur-sm sm:block">
+          <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-white/50">Property tour</p>
+          <AnimatePresence mode="wait">
+            <motion.p key={activeIndex} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} className="mt-0.5 text-[11px] font-bold">{chapters[activeIndex].title} · {chapters[activeIndex].subtitle}</motion.p>
+          </AnimatePresence>
+        </div>
+        <div className="ml-auto flex items-center gap-2 rounded-full bg-black/55 px-4 py-3 backdrop-blur-sm" aria-label={`Chapter ${activeIndex + 1} of ${chapters.length}`}>
+          <div className="flex gap-1.5" aria-hidden="true">
+            {chapters.map((chapter, index) => <span key={chapter.id} className="h-1.5 rounded-full transition-all duration-300" style={{ width: index === activeIndex ? 20 : 6, background: index === activeIndex ? accentColor : "rgba(255,255,255,0.4)" }} />)}
+          </div>
+          <p className="ml-2 text-[10px] font-bold tabular-nums">{chapters[activeIndex].id}/{String(chapters.length).padStart(2, "0")}</p>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
-};
+}
 
-// --- Main Component ---
-export default function CinematicScrol() {
+export default function ScrollTriggeredVideoHero({ chapters = DEFAULT_CHAPTERS, accentColor = "#FF385C", ctaHref = "#portfolio-heading", ctaLabel = "Browse available homes", className }) {
   const containerRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
+
+  const { scrollYProgress } = useScroll({ target: containerRef, offset: ["start start", "end end"] });
 
   useEffect(() => {
     const unsubscribe = scrollYProgress.on("change", (latest) => {
-      const newIndex = Math.min(
-        Math.floor(latest * chapters.length),
-        chapters.length - 1
-      );
+      const newIndex = Math.min(Math.floor(latest * chapters.length), chapters.length - 1);
       setActiveIndex(newIndex);
     });
     return () => unsubscribe();
-  }, [scrollYProgress]);
+  }, [scrollYProgress, chapters.length]);
 
   return (
-    <section ref={containerRef} className="relative w-full" style={{ height: `${chapters.length * 100}vh` }}>
-      {/* 1. Background */}
-      <div className="sticky top-0 h-screen w-full overflow-hidden">
-        <VideoBackground currentChapterIndex={activeIndex} />
+    <section ref={containerRef} className={cn("relative w-full", className)} style={{ height: `${chapters.length * 100}svh` }} data-testid="property-tour-hero">
+      <div className="sticky top-0 h-[100svh] w-full overflow-hidden">
+        <ChapterMedia chapters={chapters} activeIndex={activeIndex} />
+        <TourNav chapters={chapters} activeIndex={activeIndex} accentColor={accentColor} />
       </div>
-      {/* 2. Nav */}
-      <DynamicNav activeIndex={activeIndex} progress={scrollYProgress} />
-      {/* 3. Content */}
-      <div className="absolute inset-0 top-0 z-30 pointer-events-none">
+
+      <div className="pointer-events-none absolute inset-0 top-0 z-30">
         {chapters.map((chapter) => (
-          <div
-            key={chapter.id}
-            className="flex h-screen w-full items-center justify-start px-6 md:px-24"
-          >
+          <div key={chapter.id} className="flex h-[100svh] w-full items-center px-5 pb-24 pt-24 sm:px-8 lg:px-12">
             <motion.div
               variants={textContainer}
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: false, margin: "-20%" }} 
-              className="max-w-4xl pointer-events-auto"
+              viewport={{ once: false, margin: "-20%" }}
+              className="pointer-events-auto mx-auto w-full max-w-[1440px]"
             >
-              {/* Header Line */}
-              <motion.div variants={fadeIn} className="flex items-center gap-4 mb-6">
-                <div className="h-0.5 w-12 bg-indigo-500" />
-                <span className="text-xs font-bold uppercase tracking-[0.3em] text-indigo-400">
-                  Chapter {chapter.id}
-                </span>
+              <motion.div variants={fadeIn} className="mb-5">
+                <span className="inline-flex rounded-full bg-black/45 px-3 py-2 text-[9px] font-bold uppercase tracking-[0.2em] text-white/75 backdrop-blur-sm">Chapter {chapter.id} · {chapter.title}</span>
               </motion.div>
-              {/* Masked Title Reveal - UPDATED with padding (py-2) to fix clipping */}
-              <div className="overflow-hidden mb-6 py-2">
-                <motion.h2 
-                  variants={textReveal}
-                  // UPDATED: Reduced size to 7xl and relaxed leading to 'none'
-                  className="text-4xl md:text-7xl font-black text-white tracking-tighter leading-none"
-                >
-                  {chapter.subtitle}
-                </motion.h2>
+
+              <div className="max-w-[1100px] overflow-hidden py-2">
+                {chapter.id === "01" ? <motion.h1 variants={textReveal} className="max-w-[96vw] text-[46px] font-extrabold leading-[0.9] tracking-[-0.055em] text-white sm:text-[76px] md:text-[96px] lg:text-[120px]">Philadelphia,<br />ready for your stay.</motion.h1> : <motion.h2 variants={textReveal} className="max-w-[96vw] text-[46px] font-extrabold leading-[0.9] tracking-[-0.055em] text-white sm:text-[76px] md:text-[96px] lg:text-[120px]">{chapter.subtitle}</motion.h2>}
               </div>
-              {/* Description Box */}
-              <motion.div 
-                variants={fadeIn}
-                className="max-w-md p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-2xl"
-              >
-                <p className="text-lg text-white/80 leading-relaxed font-light">
-                  {chapter.description}
-                </p>
+
+              <motion.div variants={fadeIn} className="mt-8 grid max-w-[780px] gap-6 sm:grid-cols-[1fr_auto] sm:items-end">
+                <p className="max-w-xl text-[15px] font-medium leading-relaxed text-white/75 sm:text-[17px]">{chapter.description}</p>
+                <a href={ctaHref} className="group inline-flex min-h-11 items-center gap-2 justify-self-start text-[11px] font-bold uppercase tracking-[0.14em] text-white">{ctaLabel}<span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/40 transition-colors group-hover:bg-white group-hover:text-black"><ArrowDownRight size={15} /></span></a>
               </motion.div>
-              {/* Button */}
-              <motion.button
-                variants={fadeIn}
-                whileHover={{ scale: 1.05, x: 10 }}
-                whileTap={{ scale: 0.95 }}
-                className="mt-10 group flex items-center gap-4 text-white font-semibold"
-              >
-                <div className="relative h-12 w-12 rounded-full border border-white/30 flex items-center justify-center overflow-hidden">
-                  <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                  <ChevronRight size={20} className="relative z-10 group-hover:text-black transition-colors duration-300" />
-                </div>
-                <span className="tracking-widest uppercase text-xs">Explore Sequence</span>
-              </motion.button>
             </motion.div>
           </div>
         ))}
       </div>
     </section>
   );
-};
+}

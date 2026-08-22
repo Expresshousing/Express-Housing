@@ -102,6 +102,265 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
+## express_housing_hyatus_header_2026_08_18:
+##   frontend:
+##     - task: "Hyatus-inspired Express Housing header"
+##       implemented: true
+##       working: true
+##       file: "frontend/src/components/housing/Header.jsx"
+##       priority: "high"
+##       needs_retesting: false
+##       status_history:
+##         - working: "NA"
+##           agent: "main"
+##           comment: "Rebuilt only the header from the supplied screenshots and live Hyatus reference: boxed wordmark, centered five-item navigation, Locations and More menus, right-side hamburger/Sign in/profile pill, transparent home overlay, solid blurred scrolled state, and compact mobile menu. Preserved Express Housing routes, roles, saved apartments and theme access."
+##         - working: true
+##           agent: "main"
+##           comment: "Production build compiled. Browser verification confirmed the transparent hero state, solid scrolled/internal state, Locations and More dropdowns, account menu, theme toggle, /login navigation, correct internal-page spacing, and zero console errors."
+##   test_plan:
+##     current_focus:
+##       - "Frontend production build"
+##       - "Transparent and solid header visual states"
+##       - "Locations, More and account menu interactions"
+##       - "Sign-in and route navigation"
+##       - "Browser console errors"
+##     stuck_tasks: []
+##     test_all: false
+##     test_priority: "high_first"
+##   verification_complete:
+##     frontend_build: "compiled successfully"
+##     browser_checks:
+##       - "transparent header overlays the homepage photography"
+##       - "solid theme-aware header appears after scroll and on /apartments"
+##       - "Locations, More and account menus open with the expected destinations"
+##       - "theme toggle and Sign in route work"
+##       - "zero console errors"
+##     needs_retesting: false
+##   needs_retesting: false
+
+## express_housing_hero_search_overlap_2026_08_18:
+##   frontend:
+##     - task: "Search panel positioned between hero and portfolio"
+##       implemented: true
+##       working: true
+##       file: "frontend/src/components/housing/HomePage.jsx"
+##       priority: "high"
+##       needs_retesting: false
+##       status_history:
+##         - working: "NA"
+##           agent: "main"
+##           comment: "Moved the existing Where/check-in/check-out/guests/Search panel upward so it straddles the hero and portfolio boundary. Raised slideshow metadata and controls to prevent overlap."
+##         - working: "NA"
+##           agent: "main"
+##           comment: "The initial visual check found the shared container margin shorthand overriding the negative utility. Replaced it with a dedicated responsive overlap class defined after the container rule."
+##         - working: true
+##           agent: "main"
+##           comment: "Production build compiled. Browser verification confirmed the panel visibly straddles the hero/portfolio boundary, slideshow controls remain clear above it, Search routes to /apartments, and the page has zero console errors."
+##   test_plan:
+##     current_focus:
+##       - "Frontend production build"
+##       - "Homepage desktop visual overlap"
+##       - "Search inputs and slideshow controls remain usable"
+##     stuck_tasks: []
+##     test_all: false
+##     test_priority: "high_first"
+##   verification_complete:
+##     frontend_build: "compiled successfully"
+##     browser_checks:
+##       - "search panel overlaps the hero by 64px on desktop"
+##       - "slideshow metadata and controls do not collide with the panel"
+##       - "Search button routes to /apartments"
+##       - "zero console errors"
+##     needs_retesting: false
+##   needs_retesting: false
+
+## express_housing_design_system_migration_2026_08_18:
+##   frontend:
+##     - task: "Airbnb-inspired light/dark design system across every routed screen"
+##       implemented: true
+##       working: true
+##       file: "frontend/src/context/ThemeContext.jsx"
+##       priority: "high"
+##       needs_retesting: false
+##       status_history:
+##         - working: "NA"
+##           agent: "main"
+##           comment: "Installed the supplied palette contract and CSS foundation, wrapped the app in ThemeProvider, and migrated home, catalog, apartment detail, authentication, guest, admin, building-partner and contact screens to theme-derived surfaces, text and borders. Preserved coral as the only primary accent, 44px controls, 16px inputs, visible focus rings, hairline cards and reduced-motion behavior. Requested packages were already present in package.json."
+##         - working: true
+##           agent: "main"
+##           comment: "Production build compiled successfully; requested dependency set is present; maintained backend suite passed 9/9. Browser checks verified light/dark rendering and persistence, slideshow controls, catalog, detail, signup and guest dashboard, protected role redirects, and zero console errors. Static responsive audit verified the 768px mobile contract, 44px targets, 16px inputs, supplied type scale and reduced-motion override."
+##   test_plan:
+##     current_focus:
+##       - "Frontend production build and dependency verification"
+##       - "Maintained backend regression suite"
+##       - "Public and protected route smoke checks"
+##       - "Light/dark theme toggle and persistence"
+##       - "375px mobile layout, touch controls and hero motion"
+##     stuck_tasks: []
+##     test_all: true
+##     test_priority: "high_first"
+##   agent_communication:
+##     - agent: "main"
+##       message: "The complete routed UI migration is ready for compile, regression and browser verification. Test both themes and the mobile-first layout; preserve real portfolio imagery and existing booking/role behavior."
+##   verification_complete:
+##     backend_tests: "9 passed"
+##     frontend_build: "compiled successfully"
+##     dependency_check: "all 6 requested packages installed"
+##     browser_checks:
+##       - "light and dark themes render and the selected theme persists after reload"
+##       - "home slideshow, catalog, detail, signup and guest dashboard render with zero console errors"
+##       - "guest users are redirected away from admin and building-partner routes"
+##       - "routed screens use the supplied type scale and no legacy fixed surface/text/border palette remains"
+##     needs_retesting: false
+##   needs_retesting: false
+
+## express_housing_operator_photos_and_hero_slideshow_2026_08_18:
+##   backend:
+##     - task: "Operator-supplied portfolio photo mapping"
+##       implemented: true
+##       working: true
+##       file: "backend/app/fixtures/portfolio.py"
+##       priority: "medium"
+##       needs_retesting: false
+##       status_history:
+##         - working: "NA"
+##           agent: "main"
+##           comment: "Mapped all 11 supplied photos to Broad + Noble, The Hannah and 1500 Locust galleries where their filenames/source identity were clear; preserved the existing authorized Edgewater set rather than guessing."
+##         - working: true
+##           agent: "main"
+##           comment: "Maintained backend regression suite passed 9/9. Live API returned seven operator photos for Broad + Noble, two for The Hannah and two for 1500 Locust; all 11 local assets returned HTTP 200."
+##   frontend:
+##     - task: "Animated, accessible homepage portfolio slideshow"
+##       implemented: true
+##       working: true
+##       file: "frontend/src/components/housing/HomePage.jsx"
+##       priority: "high"
+##       needs_retesting: false
+##       status_history:
+##         - working: "NA"
+##           agent: "main"
+##           comment: "Replaced the black hero with a five-photo crossfade/slow-drift slideshow, readable overlays, source labels, previous/next and pause/play controls, and reduced-motion handling. Added optimized local web copies while preserving the supplied originals."
+##         - working: true
+##           agent: "main"
+##           comment: "Production build compiled. Browser verification confirmed five loaded hero images, manual next/previous, pause/play state and automatic advancement after 6.5 seconds."
+##   test_plan:
+##     current_focus:
+##       - "Frontend production build"
+##       - "Portfolio fixture regression"
+##       - "Homepage slideshow visual and interaction smoke test"
+##       - "Supplied asset HTTP availability"
+##     stuck_tasks: []
+##     test_all: false
+##     test_priority: "high_first"
+##   agent_communication:
+##     - agent: "main"
+##       message: "Photo and slideshow implementation is ready for local automated and browser verification. Originals in Downloads were not modified."
+##   verification_complete:
+##     backend_tests: "9 passed"
+##     frontend_build: "compiled successfully"
+##     browser_checks:
+##       - "five-photo hero rendered with visible photography instead of the black background"
+##       - "manual next/previous and pause/play controls changed slideshow state"
+##       - "autoplay advanced after 6.5 seconds and all hero images loaded at 1640-2560px natural width"
+##       - "all 11 operator-supplied gallery assets returned HTTP 200"
+##     needs_retesting: false
+
+## express_housing_partner_portal_and_launch_setup_2026_08_18:
+##   backend:
+##     - task: "Placeholder unit verification gate, building-scoped partner API, compliance/channel/integration setup"
+##       implemented: true
+##       working: true
+##       file: "backend/server.py"
+##       priority: "high"
+##       needs_retesting: false
+##       status_history:
+##         - working: "NA"
+##           agent: "main"
+##           comment: "Added 40 explicit TBD unit numbers with a separate verified flag; unverified numbers can support planning but cannot be released to guests. Added building_partner role with minimized, building-scoped reservation projection, plus editable compliance, channel IDs, and service-decision records."
+##         - working: true
+##           agent: "main"
+##           comment: "Maintained backend suite passed 9/9, including cross-building isolation, minimized partner fields and rejection of arrival release for an unverified placeholder."
+##   frontend:
+##     - task: "Building partner dashboard, clearer operations entry, launch setup UI, official building/model imagery"
+##       implemented: true
+##       working: true
+##       file: "frontend/src/components/housing/PartnerDashboard.jsx"
+##       priority: "high"
+##       needs_retesting: false
+##       status_history:
+##         - working: "NA"
+##           agent: "main"
+##           comment: "Added role-aware login/navigation, partner stay records with privacy notice, admin partner-account creation, compliance and channel setup, and locally stored official-source imagery labeled as building/model—not assigned-unit photography."
+##         - working: true
+##           agent: "main"
+##           comment: "Production build compiled. Browser smoke test verified all 8 image-backed preview cards, operations login/link, 40 TBD records, Launch Setup, partner-account creation and automatic building-portal routing."
+##   test_plan:
+##     current_focus:
+##       - "Backend role and building-scope enforcement"
+##       - "Unverified unit arrival-release protection"
+##       - "Portfolio/image fixture regression"
+##       - "Frontend production build"
+##       - "Admin and partner browser smoke test"
+##     stuck_tasks: []
+##     test_all: true
+##     test_priority: "high_first"
+##   agent_communication:
+##     - agent: "main"
+##       message: "Implementation is ready for local automated and browser verification. No external accounts or real channel IDs were invented."
+##   verification_complete:
+##     backend_tests: "9 passed"
+##     frontend_build: "compiled successfully"
+##     browser_checks:
+##       - "8 public inventory cards show official building/model imagery with a visible non-assigned-unit disclaimer"
+##       - "admin login routes directly to Operations and exposes Portfolio, Team and Launch Setup"
+##       - "40 candidate TBD unit numbers display as Placeholder with 0 verified numbers"
+##       - "Launch Setup displays Door, Postmark, Stripe, Hostaway, compliance and real channel-ID controls"
+##       - "building partner creation succeeds and login routes to the single-building guest-verification portal"
+##     needs_retesting: false
+
+## express_housing_architecture_update:
+##   backend:
+##     - task: "Four-building portfolio, capacity pricing, unit allocation and secure arrival release"
+##       implemented: true
+##       working: "NA"
+##       file: "backend/server.py"
+##       priority: "high"
+##       needs_retesting: true
+##       status_history:
+##         - working: "NA"
+##           agent: "main"
+##           comment: "Added 4 buildings, 40 draft physical units, 8 inventory types, server quotes, compliance gates, encrypted access secrets and arrival endpoints. Static compilation passed; automated tests and frontend build are next."
+##   frontend:
+##     - task: "Portfolio preview, quote breakdown, inventory administration and guest arrival page"
+##       implemented: true
+##       working: "NA"
+##       file: "frontend/src/components/housing/AdminPage.jsx"
+##       priority: "high"
+##       needs_retesting: true
+##       status_history:
+##         - working: "NA"
+##           agent: "main"
+##           comment: "Added honest photo fallbacks, draft warnings, server quote UI, 40-unit admin table, assignment/payment/readiness workflow and authenticated arrival display."
+##   test_plan:
+##     current_focus:
+##       - "Portfolio fixture and quote rules"
+##       - "Backend regression suite"
+##       - "Frontend production build"
+##       - "Local portfolio/admin browser smoke test"
+##     stuck_tasks: []
+##     test_all: true
+##     test_priority: "high_first"
+##   verification_complete:
+##     backend_tests: "7 passed"
+##     frontend_build: "compiled successfully"
+##     browser_checks:
+##       - "8 portfolio cards across Broad + Noble, The Hannah, Edgewater II and 1500 Locust"
+##       - "server quote displayed $300 accommodation + $125 cleaning + $65.88 tax = $490.88"
+##       - "draft request button disabled"
+##       - "admin portfolio displayed 4 buildings, 40 units, 20 one-bedroom and 20 two-bedroom"
+##       - "fabricated homepage ratings/reviews removed"
+##     needs_retesting: false
+
 user_problem_statement: "Enhanced agency profiles with multiple photos, family reviews, updated pricing ($15-$18/hr), and a Booking.com-style gallery experience. People book consultations, not long-term contracts."
 
 frontend:
@@ -522,3 +781,322 @@ backend:
       - working: true
         agent: "testing"
         comment: "COMPREHENSIVE ADMIN TEAM MANAGEMENT TESTING COMPLETED - ALL TESTS PASSED: ✅ TEST 1 - Admin Login & List Users: Admin login successful with admin@expresshousing.com/admin2025, GET /api/admin/users returns 200 with array of admin users including admin@expresshousing.com, NO password_hash field present in any user record (correctly excluded). ✅ TEST 2 - Create New Admin: POST /api/admin/users with admin token successfully creates admin2@expresshousing.com with role='admin', returned user has NO password_hash field (correct), handles duplicate email with 400 'Email already registered' (expected behavior). ✅ TEST 3 - New Admin Access: Login as admin2@expresshousing.com/admin2pass successful (200), GET /api/auth/me returns role='admin', GET /api/admin/stats with new admin token returns 200 (new admin has full dashboard access). ✅ TEST 4 - Validations: POST with password 'abc' returns 400 (password length validation working), POST with duplicate email returns 400 'already registered' (duplicate check working), POST with GUEST token returns 403 (authorization working), POST without token returns 401 (authentication required). ✅ TEST 5 - Regression: Guest login still works (200), GET /api/apartments returns 12 apartments (no regression issues). ALL CORE FUNCTIONALITY WORKING CORRECTLY. NO CRITICAL ISSUES FOUND."
+
+# ============ ARCHITECTURE FOUNDATION (2026-08-17) ============
+architecture_foundation:
+  - task: "Date-aware availability from search through booking"
+    implemented: true
+    working: true
+    file: "backend/server.py, frontend/src/components/housing/*"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "needs_testing"
+        agent: "main"
+        comment: "Added server-side date availability filtering; search dates and guest count now survive listing selection and prefill the booking page. Added incomplete/invalid date validation and frontend error handling."
+      - working: true
+        agent: "main"
+        comment: "Verified with automated API integration tests, production frontend build, and local browser flow. Dates and guest count persist from availability results into the booking panel."
+  - task: "Authentication and environment hardening"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "needs_testing"
+        agent: "main"
+        comment: "Removed client-selectable roles, default JWT/admin credentials and wildcard CORS; normalized emails; strengthened password requirements; protected destructive seed endpoint; added core indexes and example environment files."
+      - working: true
+        agent: "main"
+        comment: "Automated test confirms a public signup payload requesting role=admin is always stored as role=guest. Integration suite passes 3/3."
+  - task: "Architecture report and runnable project documentation"
+    implemented: true
+    working: true
+    file: "docs/architecture.md, README.md"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Documented current prototype, target domain model, security baseline, integration boundaries, delivery phases, and required business inputs."
+
+# ============ LANDING PAGE BELOW-HERO REDESIGN (2026-08-18) ============
+landing_page_below_hero_redesign:
+  frontend:
+    - task: "Reference-led redesign of all homepage sections below the hero"
+      implemented: true
+      working: true
+      file: "frontend/src/components/housing/HomePage.jsx"
+      stuck_count: 0
+      priority: "high"
+      needs_retesting: false
+      status_history:
+        - working: "needs_testing"
+          agent: "main"
+          comment: "Kept the header, photo hero, slideshow controls and overlapping availability search unchanged. Replaced the remaining landing content with a horizontally snapping Philadelphia building portfolio, a split numbered guest journey, and a functional stay-planning panel using the supplied theme primitives and authorized building imagery."
+        - working: true
+          agent: "main"
+          comment: "Production build compiled. Browser checks passed at 375px and 1440px in light and dark themes. Portfolio arrows advance the rail, purpose/bedroom controls update the real apartment-filter URL, and all new content remains theme-token driven with 44px controls and accessible labels."
+        - working: false
+          agent: "user"
+          comment: "Requested a simpler Hyatus-style apartment section: remove the Portfolio ready / At a glance statistics card and remove pricing and excessive building information so the section is led by images and apartment type."
+        - working: "needs_testing"
+          agent: "main"
+          comment: "Removed the statistics card, horizontal rail controls, pricing, addresses, inventory counts and long descriptions. Rebuilt the section as a balanced large-image grid with editorial copy, building name, neighborhood, one- and two-bedroom type, and one View stay link. Hero and later landing sections were not changed."
+        - working: true
+          agent: "main"
+          comment: "Production build compiled. Browser verification passed at 375px and 1440px in light and dark themes. Four building cards render, no pricing or removed summary copy remains, building links use the correct search query, and a clean runtime produced zero console errors."
+  test_plan:
+    current_focus:
+      - "Frontend production build"
+      - "375px and desktop responsive layout"
+      - "Simplified apartment image grid"
+      - "Building-specific View stay links"
+      - "Light and dark theme rendering"
+      - "Hero and search boundary regression"
+    stuck_tasks: []
+    test_all: false
+    test_priority: "high_first"
+  verification_complete:
+    frontend_build: "compiled successfully"
+    browser_checks:
+      - "hero, slideshow and overlapping search panel remain intact"
+      - "apartment section uses editorial Hyatus-inspired copy and four large image cards"
+      - "pricing, inventory counts, addresses, long descriptions and the portfolio summary card are removed"
+      - "each card shows only building name, neighborhood, apartment type and View stay"
+      - "building links route to their filtered apartment results"
+      - "timeline renders four protected booking/access steps"
+      - "planner links to the selected stay_path and apt_type"
+      - "375px, 1440px, light and dark layouts render correctly"
+      - "clean browser runtime has zero console errors"
+    needs_retesting: false
+
+# ============ LANDING PLANNER REPLACES APARTMENT CATALOG (2026-08-18) ============
+landing_planner_catalog_replacement:
+  frontend:
+    - task: "Remove the guest apartment catalog and make the landing planner the complete route to booking"
+      implemented: true
+      working: true
+      file: "frontend/src/components/housing/HomePage.jsx, frontend/src/App.js, frontend/src/components/housing/Header.jsx, frontend/src/components/housing/Footer.jsx, frontend/src/components/housing/ApartmentDetailPage.jsx"
+      stuck_count: 0
+      priority: "high"
+      needs_retesting: false
+      status_history:
+        - working: false
+          agent: "user"
+          comment: "The separate Philadelphia apartment results/filter page is unnecessary. All selection and availability behavior should live in the landing-page Stay details box, and every building card should open that building's gallery and booking page directly."
+        - working: "needs_testing"
+          agent: "main"
+          comment: "Removed ApartmentsPage from the routed guest application and deleted its component. Legacy /apartments URLs now redirect to the landing planner while preserving query parameters. The planner now selects stay purpose, bedroom type, dates, guests and exact building, calls the existing availability API, handles no-match/errors, and opens the matching building/type detail page with booking values prefilled. Updated header, footer, hero search, dashboard empty state and not-found navigation to use the planner. Building cards now open their exact building detail page directly."
+        - working: true
+          agent: "main"
+          comment: "Production build compiled. Browser verification confirmed legacy catalog redirects preserve filters, the planner selects and checks an exact building/type, date/guest/purpose values prefill the detail booking panel, all four property cards open exact building detail pages with multi-image galleries, 375px and 1440px layouts have no horizontal overflow, light/dark themes render, and runtime logs contain no errors or warnings."
+        - working: "needs_testing"
+          agent: "main"
+          comment: "The live check exposed that draft/compliance flags disabled all guest action. Kept the verification notice and no-charge semantics, but changed draft listings to accept a pending availability request for admin review instead of falsely confirming a reservation or presenting a dead button."
+        - working: true
+          agent: "main"
+          comment: "Rebuilt successfully. Browser verification confirmed draft pages now show an enabled Request availability action, retain the verification notice, preserve the selected dates/guests/purpose, and hand unauthenticated guests to sign-in before creating a pending request. Runtime logs remain clean."
+        - working: false
+          agent: "user"
+          comment: "The Choose your building panel in front of the planner image blocks the property photography and should be deleted."
+        - working: "needs_testing"
+          agent: "main"
+          comment: "Removed the entire foreground building panel and dark image tint. Preserved exact-building selection with a compact Building selector inside Stay details, leaving the right-side property image unobstructed."
+        - working: true
+          agent: "main"
+          comment: "Production build compiled. Desktop and 375px browser checks confirmed the image is unobstructed, the old panel text is absent, the in-form building selector updates The Hannah image and CTA, no horizontal overflow is present, and runtime logs contain no errors or warnings."
+  backend:
+    - task: "Use existing inventory-aware apartment search from the landing planner"
+      implemented: true
+      working: true
+      file: "backend/server.py"
+      stuck_count: 0
+      priority: "high"
+      needs_retesting: false
+      status_history:
+        - working: "needs_testing"
+          agent: "main"
+          comment: "The landing planner now calls GET /api/apartments with building search, apartment type, stay path, guests, and optional check-in/check-out. This reuses server-side date validation, conflict counting and five-home inventory capacity before routing to the booking detail page."
+        - working: true
+          agent: "main"
+          comment: "Maintained architecture and portfolio/pricing integration suites passed 9/9. Browser calls returned the correct exact Edgewater II two-bedroom result and quote after preserving date, guest and family-purpose inputs."
+  test_plan:
+    current_focus:
+      - "Frontend production build"
+      - "Legacy /apartments redirect and query preservation"
+      - "Landing planner building/type/purpose/date/guest state"
+      - "Availability API call and exact detail-page redirect"
+      - "Property-card direct building navigation"
+      - "Booking-page field prefill and image gallery"
+      - "375px and 1440px light/dark visual checks"
+      - "Browser console and failed network requests"
+      - "Unobstructed planner image and in-form building selector"
+    stuck_tasks: []
+    test_all: false
+    test_priority: "high_first"
+  agent_communication:
+    - agent: "main"
+      message: "Implementation is ready for build, API and browser verification. The removed catalog should no longer be reachable in the guest flow; selection now occurs in #stay-planner and final navigation should be /apartments/{listing_id}."
+    - agent: "main"
+      message: "Verification complete: build passed, backend regression passed 9/9, catalog redirect/planner/direct-card/prefill flows passed, responsive light/dark checks passed, and the browser runtime is clean."
+  verification_complete:
+    frontend_build: "compiled successfully"
+    backend_tests: "9 passed"
+    browser_checks:
+      - "legacy /apartments redirects to /#stay-planner and preserves apt_type, stay_path and guests"
+      - "planner routes the selected building and bedroom type through live availability search"
+      - "dates, guests and stay purpose prefill the exact detail-page booking panel"
+      - "Broad + Noble, The Hannah, Edgewater II and 1500 Locust cards use direct detail-page URLs"
+      - "detail pages render authorized multi-image galleries"
+      - "draft listings expose an enabled no-charge Request availability action and retain the compliance notice"
+      - "375px and 1440px layouts have no horizontal overflow and use 44px primary controls"
+      - "light and dark planner surfaces render from theme tokens"
+      - "browser runtime contains zero errors or warnings"
+      - "planner property photography is unobstructed at desktop and mobile widths"
+      - "in-form Building selector updates the selected property image and booking CTA"
+    needs_retesting: false
+  needs_retesting: false
+
+# ============ GUIDED FLOW TYPOGRAPHY (2026-08-18) ============
+guided_flow_typography:
+  frontend:
+    - task: "Increase the readability of the homepage guided-flow section"
+      implemented: true
+      working: true
+      file: "frontend/src/components/housing/HomePage.jsx"
+      priority: "high"
+      needs_retesting: false
+      status_history:
+        - working: false
+          agent: "user"
+          comment: "The guided-flow section text is too small to understand; enlarge its explanatory copy, protected-access message, step numbers, titles and descriptions."
+        - working: true
+          agent: "main"
+          comment: "Increased the section heading to 32px desktop/28px mobile, step titles to 24px/22px, step descriptions to 17px/16px, supporting copy to 17px, protected-access copy to 15px with a 17px label, and step numbers to 13px. Production build compiled; browser checks at 1440px and 375px confirmed clean wrapping, no horizontal overflow, and no runtime errors or warnings."
+  needs_retesting: false
+
+# ============ FOOTER NEWSLETTER REMOVAL (2026-08-18) ============
+footer_newsletter_removal:
+  frontend:
+    - task: "Remove the newsletter strip above the primary footer content"
+      implemented: true
+      working: true
+      file: "frontend/src/components/housing/Footer.jsx"
+      needs_retesting: false
+      status_history:
+        - working: false
+          agent: "user"
+          comment: "Delete the Stay in the loop, Philadelphia guides and new listings, email address and Subscribe mini tab above the footer."
+        - working: true
+          agent: "main"
+          comment: "Removed the complete newsletter strip together with its obsolete email state and toast submission logic. Production build compiled; browser verification confirmed the newsletter copy and form are absent, the primary footer remains present, there is no horizontal overflow, and runtime logs contain no errors or warnings."
+        - working: false
+          agent: "user"
+          comment: "Remove the Furnished stays in four Philadelphia buildings sentence from the footer bottom bar."
+        - working: true
+          agent: "main"
+          comment: "Removed only the requested sentence while preserving the copyright line. Production build compiled and browser verification confirmed the sentence is absent with no horizontal overflow."
+  needs_retesting: false
+
+# ============ HERO COPY AND LOGO REFINEMENT (2026-08-18) ============
+hero_copy_and_logo_refinement:
+  frontend:
+    - task: "Replace the homepage hero message and redesign only the Express Housing logo"
+      implemented: true
+      working: true
+      file: "frontend/src/components/housing/HomePage.jsx, frontend/src/components/housing/Header.jsx"
+      stuck_count: 0
+      priority: "high"
+      needs_retesting: false
+      status_history:
+        - working: false
+          agent: "user"
+          comment: "The hero message feels scattered. Replace all hero writing with concise rental-company positioning inspired by the uploaded reference, redesign the logo, and do not alter the header structure or any other page content."
+        - working: "needs_testing"
+          agent: "main"
+          comment: "Replaced the multi-step operational hero copy, two CTAs, preview disclaimer and visible slide caption with one clear Philadelphia promise, a concise audience line, one Find your stay CTA and a compact assurance pill. Replaced only the logo artwork with an original EH monogram and wordmark while preserving the existing header container, navigation, account control and behavior."
+        - working: true
+          agent: "main"
+          comment: "Production build compiled. Browser verification at 1440px and 375px confirmed the new hero copy, CTA, assurance pill and logo are readable; the original 80px header, five navigation items and account controls remain unchanged; the logo works over transparent and solid header surfaces; slideshow controls still advance; there is no horizontal overflow; and runtime logs contain no errors or warnings."
+        - working: false
+          agent: "user"
+          comment: "Remove the Furnished stays · Philadelphia eyebrow and Find your stay CTA, enlarge the hero headline and supporting sentence, and replace the boxed EH logo with only the words Express Housing and no box."
+        - working: "needs_testing"
+          agent: "main"
+          comment: "Removed the eyebrow and CTA, increased the hero headline to a responsive display scale and enlarged its supporting copy. Removed the EH monogram, subtitle, border, outline and background treatment from the logo so the header now shows only the Express Housing wordmark."
+        - working: true
+          agent: "main"
+          comment: "Production build compiled. Browser verification confirmed the eyebrow and CTA are absent, the headline renders at 64px desktop and 40px mobile, the logo contains only Express Housing with no SVG and zero-width borders, the 80px header and all navigation remain unchanged, 375px has no horizontal overflow, and runtime logs contain no errors or warnings."
+        - working: false
+          agent: "user"
+          comment: "The hero positioning should not define Express Housing as a Philadelphia-only business because the company plans to serve additional markets. Replace the city-specific message with stronger enterprise-quality copy."
+        - working: "needs_testing"
+          agent: "main"
+          comment: "Replaced the city-specific promise with the scalable headline Furnished living. Made effortless. Tightened the support copy to professionally managed apartments for business travel, medical stays, relocation and extended living without claiming current nationwide availability. No layout or component changes were made."
+        - working: true
+          agent: "main"
+          comment: "Production build compiled. Browser checks at 1440px and 375px confirmed the new location-independent headline and support copy render without overflow, no Philadelphia reference remains in the hero message, responsive type remains 64px/40px, and runtime logs contain no errors or warnings."
+        - working: false
+          agent: "user"
+          comment: "Delete the flexible-terms tab, visible/hidden property caption and previous/play/next slideshow buttons. Move the complete Where/date/guest/Search panel upward into the position vacated by those controls."
+        - working: "needs_testing"
+          agent: "main"
+          comment: "Removed the complete slideshow-control and caption row while preserving reduced-motion-aware automatic image rotation. Moved the unchanged availability SearchBar inside the bottom of the hero and added responsive hero spacing so the form remains separate from the headline at mobile and desktop widths."
+        - working: true
+          agent: "main"
+          comment: "Production build compiled. Browser checks confirmed the flexible-terms text, property caption and all three slideshow buttons are absent; the full availability form is inside the hero at 1440px and 375px; every control remains present; the mobile form has a 270px clear gap below the headline and no overflow; automatic image rotation still advances; and runtime logs contain no errors or warnings."
+        - working: false
+          agent: "user"
+          comment: "Move the Where/date/guest/Search panel slightly higher in the hero and reduce its overall size."
+        - working: "needs_testing"
+          agent: "main"
+          comment: "Raised the search panel by 20px on mobile and 24px on desktop, reduced its desktop maximum width to 1120px, tightened internal padding and gaps, and reduced the Search button to the accessible 44px minimum height without changing fields or behavior."
+        - working: true
+          agent: "main"
+          comment: "Production build compiled. Browser checks confirmed a 56px desktop and 40px mobile hero-bottom inset, 1072px rendered desktop width, 272px mobile card height, 44px Search touch target, all fields fully inside the hero, no horizontal overflow, and no runtime errors or warnings."
+        - working: false
+          agent: "user"
+          comment: "Increase the hero section height so it occupies the full screen and visitors must scroll before the next homepage section appears."
+        - working: "needs_testing"
+          agent: "main"
+          comment: "Changed the hero and its content container to a full small-viewport-height layout while retaining 780px mobile and 660px desktop minimums. The next section now begins at or below the fold, and the search panel remains anchored inside the expanded hero."
+        - working: true
+          agent: "main"
+          comment: "Production build compiled. Browser checks confirmed the hero exactly fills a 900px desktop and 812px mobile viewport, the next section begins at the viewport boundary and is not visible before scrolling, the search panel stays inside the hero with 284–290px headline clearance, there is no horizontal overflow, and runtime logs contain no errors or warnings."
+        - working: false
+          agent: "user"
+          comment: "The hero was increased vertically but should also be widened so it occupies the full available page width."
+        - working: "needs_testing"
+          agent: "main"
+          comment: "Made the hero an explicit 100dvw full-bleed section positioned from the viewport center, with no maximum width. This prevents parent containers from narrowing the background on wide screens while preserving the existing text and search-panel widths."
+        - working: true
+          agent: "main"
+          comment: "Production build compiled. Browser checks at 1920px and 375px confirmed the hero covers the complete visible viewport width edge to edge, remains full-height, keeps the search panel contained, introduces no horizontal overflow, and produces no runtime errors or warnings."
+  test_plan:
+    current_focus:
+      - "Frontend production build"
+      - "Hero copy and CTA scope"
+      - "Header structure and navigation regression"
+      - "Logo readability over hero and solid header surfaces"
+      - "375px and 1440px browser rendering"
+      - "Slideshow controls and runtime logs"
+    stuck_tasks: []
+    test_all: false
+    test_priority: "high_first"
+  verification_complete:
+    frontend_build: "compiled successfully"
+    browser_checks:
+      - "new concise hero message and single Find your stay CTA render at desktop and mobile widths"
+      - "old headline, second CTA, preview warning and visible Now showing label are absent"
+      - "original EH monogram and wordmark are legible over transparent and solid header surfaces"
+      - "header remains 80px with Locations, Corporate Stays, Lease to Us, Monthly Stays and More unchanged"
+      - "slideshow controls advance one active image and preserve an accessible image label"
+      - "375px layout has no horizontal overflow"
+      - "browser runtime contains zero errors or warnings"
+    needs_retesting: false
+  needs_retesting: false

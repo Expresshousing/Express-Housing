@@ -111,3 +111,18 @@ frontend/node_modules/.cache/default-development/0.pack
 credentials.json
 *.key
 .credentials
+
+# Safe configuration templates belong in version control.
+!**/.env.example
+
+# playwright-cli snapshot/console output
+.playwright-cli/
+
+# Local dev runtime: downloaded MongoDB binary, database files, PIDs, logs.
+.devdata/
+
+# Manual QA screenshots and console dumps from testing sessions.
+.playwright-mcp/
+/chrome-*.png
+/firefox-*.png
+/console-*.log

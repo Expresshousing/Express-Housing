@@ -1,349 +1,297 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Briefcase, HeartPulse, Home, Search, Wifi, Key, Clock, Headphones, Star } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import api from "@/lib/api";
-import ApartmentCard from "@/components/housing/ApartmentCard";
+import { useTheme } from "@/context/ThemeContext";
+import { pageStyle } from "@/lib/designSystem";
+import ScrollTriggeredVideoHero from "@/components/ui/scroll-triggered-video-hero";
 
-const HERO_SLIDES = [
+const STAY_STORIES = [
   {
-    image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?crop=entropy&cs=srgb&fm=jpg&q=85&w=1920",
-    eyebrow: "Express Housing · Philadelphia",
-    lead: "furnished stays",
-    title: "Made Flexible",
-    sub: "Designer apartments in Philadelphia's best buildings. Stay a week, a month, or a year — fully furnished, ready on arrival.",
+    title: "Verified before you arrive",
+    text: "Every unit is checked for readiness — cleaning, condition, and Door access — before the arrival page is released.",
+    image: "/images/buildings/1500-locust/model-interior.jpg",
   },
   {
-    image: "https://images.unsplash.com/photo-1518733057094-95b53143d2a7?crop=entropy&cs=srgb&fm=jpg&q=85&w=1920",
-    eyebrow: "Corporate Housing",
-    lead: "your team's",
-    title: "Home Base",
-    sub: "Polished apartments near business districts with dedicated workspaces, gigabit Wi-Fi, and terms your travel team will like.",
+    title: "Scheduled Door access",
+    text: "Entry opens exactly when your stay begins and closes when it ends. No guessing, no generic codes.",
+    image: "/images/buildings/edgewater-2/model-interior.jpg",
   },
   {
-    image: "https://images.unsplash.com/photo-1686056040370-b5e5c06c4273?crop=entropy&cs=srgb&fm=jpg&q=85&w=1920",
-    eyebrow: "Medical & Family Stays",
-    lead: "close to care,",
-    title: "Close to Home",
-    sub: "Comfortable homes near Penn Medicine, CHOP, and Jefferson for treatment, recovery, and the families who come along.",
-  },
-];
-
-const STAY_PATHS = [
-  {
-    icon: Briefcase,
-    tag: "01",
-    title: "Corporate Partners",
-    text: "Preferred apartments for business travel, insurance relocation, and project teams that need a polished home base.",
-    image: "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?crop=entropy&cs=srgb&fm=jpg&q=85&w=1200",
-    link: "/apartments?stay_path=corporate",
+    title: "One team, reachable",
+    text: "The person who confirms your reservation is the same person you reach if something needs to change.",
+    image: "/images/buildings/the-hannah/business-center.jpg",
   },
   {
-    icon: HeartPulse,
-    tag: "02",
-    title: "Medical Travelers",
-    text: "Furnished apartments for treatment, recovery, visiting clinicians, and families who need comfort close to care.",
-    image: "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?crop=entropy&cs=srgb&fm=jpg&q=85&w=1200",
-    link: "/apartments?stay_path=medical",
-  },
-  {
-    icon: Home,
-    tag: "03",
-    title: "Families & Relocation",
-    text: "Flexible furnished homes for renovations, local transitions, and international families who need a place that works immediately.",
-    image: "https://images.unsplash.com/photo-1600489000022-c2086d79f9d4?crop=entropy&cs=srgb&fm=jpg&q=85&w=1200",
-    link: "/apartments?stay_path=family",
+    title: "Built for every stay length",
+    text: "Three nights or three months — the same standard applies, whether it's a quick trip or a full relocation.",
+    image: "/images/buildings/1500-locust/building-amenity.jpg",
   },
 ];
 
-const BENEFITS = [
-  { icon: Home, title: "Fully Furnished", text: "Every stay arrives move-in ready — furniture, kitchenware, linens, and Wi-Fi included." },
-  { icon: Clock, title: "Flexible Terms", text: "From 2 nights to 12 months. Extend, shorten, or switch units as plans change." },
-  { icon: Key, title: "Self Check-in", text: "Keypad entry on every door. Arrive at midnight, settle in by 12:05." },
-  { icon: Headphones, title: "24/7 Guest Support", text: "A real Philadelphia-based team, one message away for your entire stay." },
+const PORTFOLIO_BUILDINGS = [
+  {
+    name: "Broad + Noble",
+    neighborhood: "Callowhill",
+    image: "/images/operator-portfolio/broad-noble-private-terrace.jpg",
+    imagePosition: "center 52%",
+  },
+  {
+    name: "The Hannah",
+    neighborhood: "Callowhill",
+    image: "/images/operator-portfolio/the-hannah-entrance.jpg",
+    imagePosition: "center center",
+  },
+  {
+    name: "Edgewater II",
+    neighborhood: "Logan Square",
+    image: "/images/buildings/edgewater-2/model-interior.jpg",
+    imagePosition: "center center",
+  },
+  {
+    name: "1500 Locust",
+    neighborhood: "Rittenhouse Square",
+    image: "/images/operator-portfolio/center-city-rooftop.webp",
+    imagePosition: "center 43%",
+  },
 ];
 
-const STEPS = [
-  { n: "01", title: "Search", text: "Choose your dates, guests, and neighborhood." },
-  { n: "02", title: "Compare", text: "Review furnished homes by size, budget, and stay fit." },
-  { n: "03", title: "Request", text: "Send a booking request — we confirm within hours." },
-  { n: "04", title: "Stay", text: "Arrive to a home that's ready, with support nearby." },
+const TOUR_CHAPTERS = [
+  {
+    id: "01",
+    title: "Arrival",
+    subtitle: "A staffed lobby",
+    posterUrl: "/images/operator-portfolio/broad-noble-lobby.jpg",
+    videoUrl: null,
+    description: "Every building is staffed and monitored — a real address for business travel, medical stays, and relocation, not a lockbox.",
+  },
+  {
+    id: "02",
+    title: "Unwind",
+    subtitle: "Sky deck & lounge",
+    posterUrl: "/images/operator-portfolio/broad-noble-sky-deck.webp",
+    videoUrl: null,
+    description: "Rooftop seating, grills, and a resident lounge give a stay somewhere to decompress after a long shift or travel day.",
+  },
+  {
+    id: "03",
+    title: "Recharge",
+    subtitle: "Fitness studio",
+    posterUrl: "/images/operator-portfolio/broad-noble-gym.jpg",
+    videoUrl: null,
+    description: "A full fitness studio on-site, so a multi-week stay doesn't mean pausing a routine or hunting for a day pass.",
+  },
+  {
+    id: "04",
+    title: "Home",
+    subtitle: "The residence",
+    posterUrl: "/images/operator-portfolio/broad-noble-kitchen.jpg",
+    videoUrl: null,
+    description: "Fully furnished one- and two-bedroom homes with a real kitchen, in-unit laundry, and everything set up before arrival.",
+  },
 ];
 
-const REVIEWS = [
-  { name: "Cree · New York", purpose: "Business stay", text: "Check-in and out was a breeze — beautiful place in a luxury building. Better than any hotel week I've had." },
-  { name: "Kang · Seoul", purpose: "International relocation", text: "Moving from Korea, we needed a home that worked from day one. Express Housing handled everything before we landed." },
-  { name: "Shaine · Chicago", purpose: "Medical travel", text: "Two months near CHOP during my daughter's treatment. The team's care went far beyond the apartment." },
+const STAY_PROCESS = [
+  ["01", "Choose with context", "Compare a focused collection by neighborhood, bedroom type, stay length, and the details that matter before you request."],
+  ["02", "Review what is confirmed", "See dates, pricing, policies, parking, and the assigned-home details before any payment step."],
+  ["03", "Arrive with one plan", "Your private arrival page brings together the address, entry instructions, Door access, Wi-Fi, and support."],
 ];
-
-function HeroCarousel() {
-  const [idx, setIdx] = useState(0);
-  const next = useCallback(() => setIdx((i) => (i + 1) % HERO_SLIDES.length), []);
-  const prev = () => setIdx((i) => (i - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
-
-  useEffect(() => {
-    const t = setInterval(next, 6000);
-    return () => clearInterval(t);
-  }, [next]);
-
-  const slide = HERO_SLIDES[idx];
-
-  return (
-    <section className="relative h-[68vh] min-h-[480px] w-full overflow-hidden bg-[#212529]" data-testid="hero-carousel">
-      {HERO_SLIDES.map((s, i) => (
-        <div
-          key={i}
-          className={`absolute inset-0 transition-opacity duration-1000 ${i === idx ? "opacity-100" : "opacity-0"}`}
-        >
-          <img src={s.image} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-black/10" />
-        </div>
-      ))}
-
-      <div className="relative z-10 h-full eh-container flex items-center">
-        <div key={idx} className="eh-slide-content max-w-2xl text-white">
-          <p className="eyebrow !text-[#e8a87e] mb-3">{slide.eyebrow}</p>
-          <h2 className="text-2xl md:text-3xl font-light lowercase tracking-wide">{slide.lead}</h2>
-          <h1 className="text-4xl md:text-6xl font-extrabold uppercase tracking-tight leading-none mt-1 mb-5">
-            {slide.title}
-          </h1>
-          <p className="text-white/85 text-sm md:text-base max-w-lg font-light leading-relaxed mb-8">{slide.sub}</p>
-          <div className="flex flex-wrap gap-3">
-            <Link to="/apartments" className="btn-eh" data-testid="hero-browse-btn">Browse Apartments</Link>
-            <Link to="/contact" className="btn-eh-outline on-dark">Ask Express Housing</Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Arrows */}
-      <button onClick={prev} className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 border border-white/40 text-white flex items-center justify-center hover:bg-white hover:text-[#212529] transition-colors" aria-label="Previous slide">
-        <ChevronLeft size={18} />
-      </button>
-      <button onClick={next} className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 border border-white/40 text-white flex items-center justify-center hover:bg-white hover:text-[#212529] transition-colors" aria-label="Next slide">
-        <ChevronRight size={18} />
-      </button>
-
-      {/* Dots */}
-      <div className="absolute bottom-24 md:bottom-16 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-        {HERO_SLIDES.map((_, i) => (
-          <button key={i} onClick={() => setIdx(i)} className={`h-[3px] transition-all ${i === idx ? "w-8 bg-[#bd744c]" : "w-4 bg-white/40"}`} aria-label={`Slide ${i + 1}`} />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function SearchBar({ neighborhoods }) {
-  const navigate = useNavigate();
-  const [where, setWhere] = useState("");
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
-  const [guests, setGuests] = useState("");
-
-  const submit = (e) => {
-    e.preventDefault();
-    const params = new URLSearchParams();
-    if (where) params.set("neighborhood", where);
-    if (guests) params.set("guests", guests);
-    if (checkIn) params.set("check_in", checkIn);
-    if (checkOut) params.set("check_out", checkOut);
-    navigate(`/apartments?${params.toString()}`);
-  };
-
-  return (
-    <div className="relative z-30 eh-container -mt-14">
-      <form
-        onSubmit={submit}
-        className="bg-white shadow-xl border border-gray-100 p-4 md:p-5 grid grid-cols-2 md:grid-cols-5 gap-3 items-end"
-        data-testid="home-search-bar"
-      >
-        <div className="col-span-2 md:col-span-1">
-          <label className="label-eh">Where</label>
-          <select className="input-eh" value={where} onChange={(e) => setWhere(e.target.value)} data-testid="search-neighborhood">
-            <option value="">All Philadelphia</option>
-            {neighborhoods.map((n) => (
-              <option key={n.name} value={n.name}>{n.name}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="label-eh">Check-in</label>
-          <input type="date" className="input-eh" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} data-testid="search-checkin" />
-        </div>
-        <div>
-          <label className="label-eh">Check-out</label>
-          <input type="date" className="input-eh" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} data-testid="search-checkout" />
-        </div>
-        <div>
-          <label className="label-eh">Guests</label>
-          <select className="input-eh" value={guests} onChange={(e) => setGuests(e.target.value)} data-testid="search-guests">
-            <option value="">Any</option>
-            {[1, 2, 3, 4, 5, 6].map((g) => (
-              <option key={g} value={g}>{g}+ guests</option>
-            ))}
-          </select>
-        </div>
-        <button type="submit" className="btn-eh w-full h-[46px]" data-testid="search-submit">
-          <Search size={15} /> Search
-        </button>
-      </form>
-    </div>
-  );
-}
 
 export default function HomePage() {
+  const { colors: c } = useTheme();
+  const location = useLocation();
   const [apartments, setApartments] = useState([]);
-  const [neighborhoods, setNeighborhoods] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([api.get("/apartments"), api.get("/neighborhoods")])
-      .then(([a, n]) => {
-        setApartments(a.data);
-        setNeighborhoods(n.data);
-      })
-      .finally(() => setLoading(false));
+    let active = true;
+    api.get("/apartments")
+      .then((response) => { if (active) setApartments(Array.isArray(response.data) ? response.data : []); })
+      .catch(() => { if (active) setApartments([]); });
+    return () => { active = false; };
   }, []);
 
-  const newListings = [...apartments].sort((a, b) => (b.is_new === true) - (a.is_new === true)).slice(0, 8);
-  const featured = apartments.filter((a) => a.is_featured).slice(0, 4);
+  useEffect(() => {
+    const scrollTimer = location.hash === "#stay-planner"
+      ? window.setTimeout(() => document.getElementById("stay-planner")?.scrollIntoView({ block: "start" }), 60)
+      : null;
+    return () => { if (scrollTimer) window.clearTimeout(scrollTimer); };
+  }, [location.hash]);
+
+  const buildingCards = useMemo(() => PORTFOLIO_BUILDINGS.map((building) => {
+    const listings = apartments.filter((apartment) => apartment.building_name === building.name);
+    return {
+      ...building,
+      image: listings[0]?.images?.[0] || building.image,
+      listingId: (listings.find((apartment) => apartment.apt_type === "1 Bedroom") || listings[0])?.id,
+    };
+  }), [apartments]);
 
   return (
-    <div>
-      <HeroCarousel />
-      <SearchBar neighborhoods={neighborhoods} />
-
-      {/* New Listings */}
-      <section className="eh-container mt-16 md:mt-20">
-        <p className="eyebrow text-center mb-2">Philadelphia, PA</p>
-        <h3 className="section-title">New Listings</h3>
-        <p className="section-sub">Freshly furnished homes across the city’s best neighborhoods — ready for stays from 2 nights to 12 months.</p>
-        {loading ? (
-          <div className="py-16 text-center">
-            <div className="animate-spin w-10 h-10 border-4 border-[#bd744c] border-t-transparent rounded-full mx-auto" />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" data-testid="new-listings-grid">
-            {newListings.map((apt) => (
-              <ApartmentCard key={apt.id} apartment={apt} />
-            ))}
-          </div>
-        )}
-        <div className="text-center mt-10">
-          <Link to="/apartments" className="btn-eh-outline" data-testid="view-all-btn">View All Apartments</Link>
-        </div>
+    <div style={pageStyle(c)}>
+      <section id="stay-planner" className="relative left-1/2 w-[100dvw] max-w-none -translate-x-1/2 scroll-mt-24" aria-label="Express Housing furnished apartment portfolio">
+        <ScrollTriggeredVideoHero chapters={TOUR_CHAPTERS} accentColor={c.BLUE} />
       </section>
 
-      {/* Stay Paths */}
-      <section className="eh-container mt-20">
-        <h3 className="section-title">The Right Home Base for Every Stay</h3>
-        <p className="section-sub">We rent through Philadelphia’s best apartment communities so you can stay on your terms — for work, care, or family.</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {STAY_PATHS.map((p) => (
-            <Link key={p.tag} to={p.link} className="group relative overflow-hidden block h-[380px]" data-testid={`stay-path-${p.tag}`}>
-              <img src={p.image} alt={p.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
-              <div className="relative z-10 h-full flex flex-col justify-end p-6 text-white">
-                <span className="text-[#e8a87e] font-extrabold text-sm mb-2">{p.tag}</span>
-                <h4 className="text-lg font-bold uppercase tracking-wide mb-2">{p.title}</h4>
-                <p className="text-white/80 text-[13px] leading-relaxed mb-4">{p.text}</p>
-                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-white group-hover:text-[#e8a87e] transition-colors">
-                  View Stay Path →
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Featured */}
-      <section className="bg-[#faf7f4] mt-20 py-16">
+      <section className="py-20 md:py-28 lg:py-36" aria-labelledby="portfolio-heading">
         <div className="eh-container">
-          <h3 className="section-title">Featured Stays</h3>
-          <p className="section-sub">Our most-booked apartments — guest favorites across corporate, medical, and family travel.</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" data-testid="featured-grid">
-            {featured.map((apt) => (
-              <ApartmentCard key={apt.id} apartment={apt} />
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-15%" }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="flex items-center justify-between gap-6 border-b pb-5" style={{ borderColor: c.BORDER }}><div className="flex items-center gap-3"><span className="h-0.5 w-9" style={{ background: c.BLUE }} aria-hidden="true" /><p className="text-[10px] font-bold uppercase tracking-[0.24em]" style={{ color: c.MUTED }}>The collection</p></div><p className="hidden text-[10px] font-bold uppercase tracking-[0.2em] sm:block" style={{ color: c.MUTED }}>04 Philadelphia buildings</p></div>
+            <div className="grid gap-8 pb-14 pt-10 md:grid-cols-[1.25fr_0.75fr] md:items-end md:gap-16 md:pb-20 md:pt-14">
+              <h2 id="portfolio-heading" className="max-w-[900px] scroll-mt-24 text-[44px] font-extrabold leading-[0.92] tracking-[-0.05em] sm:text-[64px] md:text-[78px] lg:text-[92px]">Four addresses.<br /><span style={{ color: c.BLUE }}>One way to stay.</span></h2>
+              <p className="max-w-md text-[15px] leading-relaxed md:pb-2 md:text-[17px]" style={{ color: c.MUTED }}>A deliberately small Philadelphia portfolio, so every home can be prepared, confirmed, and supported by the same team.</p>
+            </div>
+          </motion.div>
+
+          <div className="grid grid-cols-1 gap-x-5 gap-y-14 md:grid-cols-12 md:gap-y-20" data-testid="new-listings-grid">
+            {buildingCards.map((building, index) => (
+              <motion.article
+                key={building.name}
+                className={`${index % 2 === 0 ? "md:col-span-7" : "md:col-span-5"} ${index === 1 || index === 2 ? "md:mt-12" : ""}`}
+                initial={{ opacity: 0, y: 32 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-10%" }}
+                transition={{ duration: 0.7, delay: (index % 4) * 0.08, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <Link to={building.listingId ? `/apartments/${building.listingId}` : `/?building=${encodeURIComponent(building.name)}#stay-planner`} className="group block" aria-label={`View furnished apartments at ${building.name}`}>
+                  <div className={`relative overflow-hidden rounded-[18px] ${index % 2 === 0 ? "aspect-[4/3]" : "aspect-[5/4]"}`}>
+                    <img src={building.image} alt={`${building.name} official building or model-home view`} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" style={{ objectPosition: building.imagePosition }} loading="lazy" decoding="async" />
+                    <span className="absolute left-5 top-5 flex h-9 min-w-9 items-center justify-center rounded-full bg-white px-3 text-[10px] font-extrabold text-black">0{index + 1}</span>
+                  </div>
+                  <div className="mt-5 flex items-end justify-between gap-5 border-t pt-5" style={{ borderColor: c.BORDER }}>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: c.MUTED }}>{building.neighborhood} · Philadelphia</p>
+                      <h3 className="mt-2 text-[25px] font-extrabold leading-none tracking-[-0.035em] sm:text-[30px]">{building.name}</h3>
+                      <p className="mt-2 text-[12px] font-semibold" style={{ color: c.MUTED }}>Furnished one- and two-bedroom homes</p>
+                    </div>
+                    <span className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border transition-colors group-hover:text-white" style={{ borderColor: c.BORDER }}>
+                      <span className="absolute inset-0 translate-y-full transition-transform duration-300 group-hover:translate-y-0" style={{ background: c.BLUE }} />
+                      <ArrowUpRight size={17} style={{ color: c.TEXT }} className="relative z-10 transition-colors duration-300 group-hover:text-white" />
+                    </span>
+                  </div>
+                </Link>
+              </motion.article>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Neighborhoods */}
-      <section className="eh-container mt-20">
-        <h3 className="section-title">Explore Philadelphia Neighborhoods</h3>
-        <p className="section-sub">Every Express Housing building is hand-picked for walkability, safety, and the neighborhood around it.</p>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {neighborhoods.slice(0, 5).map((n) => (
-            <Link
-              key={n.name}
-              to={`/apartments?neighborhood=${encodeURIComponent(n.name)}`}
-              className="group relative h-44 overflow-hidden block"
-              data-testid={`neighborhood-${n.name}`}
-            >
-              <img src={n.image} alt={n.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-              <div className="absolute inset-0 bg-black/45 group-hover:bg-black/30 transition-colors" />
-              <div className="relative z-10 h-full flex flex-col items-center justify-center text-white text-center px-2">
-                <span className="font-bold text-sm uppercase tracking-wider">{n.name}</span>
-                <span className="text-[11px] text-white/80 mt-1">{n.count} {n.count === 1 ? "home" : "homes"} · from ${Math.round(n.min_rate)}/nt</span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Benefits InfoBlock */}
-      <section className="border-y border-gray-100 mt-20">
-        <div className="eh-container py-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {BENEFITS.map((b) => (
-            <div key={b.title} className="flex gap-4">
-              <div className="w-11 h-11 shrink-0 bg-[#bd744c]/10 text-[#bd744c] flex items-center justify-center">
-                <b.icon size={20} />
-              </div>
+      <section className="relative left-1/2 w-[100dvw] max-w-none -translate-x-1/2 bg-[#f2f1ee] py-20 text-[#171717] md:py-28 lg:py-36" aria-labelledby="process-heading">
+        <div className="eh-container">
+          <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-15%" }} transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}>
+            <div className="flex items-center justify-between gap-6 border-b border-black/20 pb-5"><div className="flex items-center gap-3"><span className="h-0.5 w-9" style={{ background: c.BLUE }} aria-hidden="true" /><p className="text-[10px] font-bold uppercase tracking-[0.24em] text-black/55">How the stay works</p></div><p className="hidden text-[10px] font-bold uppercase tracking-[0.2em] text-black/40 sm:block">One guided flow</p></div>
+            <div className="grid gap-12 pb-14 pt-10 md:grid-cols-[0.9fr_1.1fr] md:gap-20 md:pb-20 md:pt-14">
               <div>
-                <h5 className="font-bold text-sm uppercase tracking-wide mb-1">{b.title}</h5>
-                <p className="text-gray-500 text-[13px] leading-relaxed">{b.text}</p>
+                <h2 id="process-heading" className="max-w-[720px] text-[42px] font-extrabold leading-[0.92] tracking-[-0.05em] sm:text-[64px] md:text-[76px] lg:text-[88px]">Furnished housing,<br />run like an operation.</h2>
+                <p className="mt-7 max-w-lg text-[15px] leading-relaxed text-black/60 md:text-[17px]">Search, confirmation, arrival, and support stay connected. No spreadsheet handoffs. No guessing which email has the current information.</p>
+                <Link to="/about" className="mt-8 inline-flex min-h-11 items-center gap-2 rounded-full bg-black px-5 text-[12px] font-bold text-white">How Express Housing works <ArrowRight size={15} /></Link>
               </div>
+              <ol className="border-t border-black/20">
+                {STAY_PROCESS.map(([number, title, text]) => <li key={number} className="grid gap-4 border-b border-black/20 py-7 sm:grid-cols-[48px_0.7fr_1.3fr] sm:gap-6"><span className="text-[11px] font-extrabold" style={{ color: c.BLUE }}>{number}</span><h3 className="text-[18px] font-extrabold leading-tight tracking-[-0.02em]">{title}</h3><p className="text-[13px] leading-relaxed text-black/55 md:text-[14px]">{text}</p></li>)}
+              </ol>
             </div>
-          ))}
+          </motion.div>
+
+          <motion.div className="grid gap-4 lg:grid-cols-[1.45fr_0.55fr]" initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-10%" }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}>
+            <figure>
+              <div className="relative aspect-[4/3] overflow-hidden rounded-[18px] lg:aspect-[16/11]"><img src="/images/operator-portfolio/broad-noble-private-terrace.jpg" alt="Private terrace at a Philadelphia Express Housing building" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: "center 52%" }} loading="lazy" decoding="async" /></div>
+              <figcaption className="mt-3 text-[10px] font-bold uppercase tracking-[0.16em] text-black/45">Space beyond the apartment · Broad + Noble</figcaption>
+            </figure>
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-1">
+              <figure><div className="relative aspect-square overflow-hidden rounded-[18px]"><img src="/images/operator-portfolio/broad-noble-gym.jpg" alt="Fitness studio at Broad and Noble" className="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" /></div><figcaption className="mt-3 text-[10px] font-bold uppercase tracking-[0.16em] text-black/45">Fitness</figcaption></figure>
+              <figure><div className="relative aspect-square overflow-hidden rounded-[18px]"><img src="/images/operator-portfolio/broad-noble-study-lounge.webp" alt="Resident study lounge at Broad and Noble" className="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" /></div><figcaption className="mt-3 text-[10px] font-bold uppercase tracking-[0.16em] text-black/45">Work & lounge</figcaption></figure>
+            </div>
+          </motion.div>
+
+          <div className="mt-10 flex flex-col gap-3 border-t border-black/20 pt-5 text-[11px] leading-relaxed text-black/45 sm:flex-row sm:items-center sm:justify-between"><p>Official building and model-home imagery.</p><p>Private unit and entry details are released only for an approved stay.</p></div>
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="eh-container mt-20">
-        <p className="eyebrow text-center mb-2">How it works</p>
-        <h3 className="section-title">From Search to a Stay That Fits</h3>
-        <p className="section-sub">Browse first, then send us the details — our team confirms every request personally.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {STEPS.map((s) => (
-            <div key={s.n} className="text-center">
-              <span className="text-4xl font-extrabold text-[#bd744c]/20">{s.n}</span>
-              <h5 className="font-bold uppercase tracking-wide text-sm mt-2 mb-2">{s.title}</h5>
-              <p className="text-gray-500 text-[13px] leading-relaxed">{s.text}</p>
+      <section className="relative left-1/2 w-[100dvw] max-w-none -translate-x-1/2 overflow-hidden bg-[#0b0b0b] text-white" aria-labelledby="stay-standard-heading">
+        <div className="eh-container py-20 md:py-28 lg:py-32">
+          <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-15%" }} transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}>
+            <div className="flex items-center justify-between gap-6 border-b border-white/20 pb-5">
+              <div className="flex items-center gap-3"><span className="h-0.5 w-9" style={{ background: c.BLUE }} aria-hidden="true" /><p className="text-[10px] font-bold uppercase tracking-[0.24em] text-white/55">The Express standard</p></div>
+              <p className="hidden text-[10px] font-bold uppercase tracking-[0.2em] text-white/35 sm:block">Before · during · after</p>
             </div>
-          ))}
-        </div>
-      </section>
 
-      {/* Reviews */}
-      <section className="bg-[#212529] text-white mt-20 py-16">
-        <div className="eh-container">
-          <div className="flex flex-col items-center mb-10">
-            <div className="flex items-center gap-1 text-[#e8a87e] mb-2">
-              {[...Array(5)].map((_, i) => <Star key={i} size={16} className="fill-current" />)}
+            <div className="grid gap-10 pb-16 pt-10 md:grid-cols-[1.45fr_0.55fr] md:items-end md:gap-16 md:pb-24 md:pt-14">
+              <h2 id="stay-standard-heading" className="max-w-[920px] text-[42px] font-extrabold leading-[0.92] tracking-[-0.05em] sm:text-[64px] md:text-[78px] lg:text-[96px]">A stay should feel settled before you arrive.</h2>
+              <p className="max-w-md text-[15px] leading-relaxed text-white/60 md:pb-2 md:text-[17px]">A real address, a verified home, and one reachable team. We organize the details early so arrival day feels reassuringly uneventful.</p>
             </div>
-            <h3 className="text-2xl font-bold">4.8 / 5 average guest rating</h3>
-            <p className="text-white/50 text-sm mt-1">Across Google, Trustpilot & Apartments.com</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {REVIEWS.map((r) => (
-              <div key={r.name} className="border border-white/10 p-6">
-                <p className="text-white/85 text-sm leading-relaxed italic">“{r.text}”</p>
-                <p className="mt-4 font-bold text-sm">{r.name}</p>
-                <p className="text-[#e8a87e] text-xs uppercase tracking-wider mt-0.5">{r.purpose}</p>
-              </div>
+          </motion.div>
+
+          <div className="grid gap-x-5 gap-y-14 md:grid-cols-2 md:gap-y-20">
+            {STAY_STORIES.map((story, index) => (
+              <motion.article
+                key={story.title}
+                className={index === 1 || index === 2 ? "md:mt-16" : ""}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-10%" }}
+                transition={{ duration: 0.75, delay: (index % 2) * 0.08, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <div className={`relative overflow-hidden rounded-[18px] ${index === 0 || index === 3 ? "aspect-[4/3]" : "aspect-[5/4]"}`}>
+                  <img src={story.image} alt="" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 hover:scale-[1.02]" loading="lazy" decoding="async" />
+                  <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/55 to-transparent" aria-hidden="true" />
+                  <span className="absolute bottom-5 left-5 flex h-9 w-9 items-center justify-center rounded-full bg-white text-[11px] font-extrabold text-black">{String(index + 1).padStart(2, "0")}</span>
+                </div>
+                <div className="mt-5 grid gap-3 border-t border-white/20 pt-5 sm:grid-cols-[0.8fr_1.2fr] sm:gap-8">
+                  <h3 className="text-[19px] font-extrabold leading-tight tracking-[-0.02em] md:text-[22px]">{story.title}</h3>
+                  <p className="text-[13px] leading-relaxed text-white/55 md:text-[14px]">{story.text}</p>
+                </div>
+              </motion.article>
             ))}
           </div>
+
+          <div className="mt-24 flex justify-end border-t border-white/20 pt-6 md:mt-36">
+            <p className="max-w-md text-right text-[11px] font-bold uppercase leading-relaxed tracking-[0.18em] text-white/40">One operating standard<br />for every length of stay</p>
+          </div>
         </div>
+      </section>
+
+      <section className="relative left-1/2 w-[100dvw] max-w-none -translate-x-1/2" style={{ background: c.BG, color: c.TEXT }} aria-labelledby="philadelphia-heading">
+        <div className="eh-container py-20 md:py-28 lg:py-36">
+          <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-15%" }} transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}>
+            <div className="flex items-center gap-3"><span className="h-0.5 w-9" style={{ background: c.BLUE }} aria-hidden="true" /><p className="text-[10px] font-bold uppercase tracking-[0.24em]" style={{ color: c.MUTED }}>Philadelphia, Pennsylvania</p></div>
+            <h2 id="philadelphia-heading" className="mt-8 max-w-[1120px] text-[44px] font-extrabold leading-[0.92] tracking-[-0.05em] sm:text-[68px] md:text-[88px] lg:text-[108px]">Your next stay,<br /><span style={{ color: c.BLUE }}>already considered.</span></h2>
+
+            <div className="mt-12 grid gap-10 border-t pt-8 md:mt-16 md:grid-cols-[1fr_0.75fr] md:items-end md:gap-16 md:pt-10" style={{ borderColor: c.BORDER }}>
+              <p className="max-w-2xl text-[20px] font-bold leading-[1.25] tracking-[-0.02em] md:text-[26px]">Furnished homes across four Philadelphia buildings, ready for business travel, medical visits, relocation, and the plans in between.</p>
+              <div className="flex flex-col items-start gap-3 sm:flex-row md:justify-self-end">
+                <Link to="/#stay-planner" className="inline-flex min-h-12 items-center gap-2 rounded-full px-6 text-[14px] font-bold text-white transition-transform hover:-translate-y-0.5" style={{ background: c.BLUE }}>View available homes <ArrowRight size={16} /></Link>
+                <Link to="/contact" className="btn-eh-outline min-h-12 px-6 text-[14px]">Contact the team</Link>
+              </div>
+            </div>
+
+            <dl className="mt-12 grid grid-cols-3 border-y md:mt-16" style={{ borderColor: c.BORDER }}>
+              {[["04", "Philadelphia buildings"], ["01", "Reachable housing team"], ["24/7", "Arrival information"]].map(([value, label]) => <div key={label} className="border-r py-6 pr-3 last:border-r-0 sm:py-8 sm:pl-5 sm:first:pl-0" style={{ borderColor: c.BORDER }}><dt className="text-[24px] font-extrabold leading-none tracking-[-0.04em] sm:text-[32px]">{value}</dt><dd className="mt-2 max-w-[150px] text-[9px] font-bold uppercase leading-relaxed tracking-[0.14em]" style={{ color: c.MUTED }}>{label}</dd></div>)}
+            </dl>
+          </motion.div>
+        </div>
+
+        <motion.figure
+          className="eh-container pb-20 md:pb-28"
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-10%" }}
+          transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[20px] sm:aspect-[16/10] lg:aspect-[16/8]">
+            <img src="/images/buildings/the-hannah/model-one-bedroom.jpg" alt="Furnished one-bedroom residence at The Hannah in Philadelphia" className="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />
+            <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/70 to-transparent" aria-hidden="true" />
+            <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 p-5 text-white sm:p-8">
+              <div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">The Hannah · Callowhill</p><p className="mt-2 text-[18px] font-extrabold sm:text-[24px]">A real home, ready on arrival.</p></div>
+              <Link to="/#stay-planner" className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-black sm:flex" aria-label="Explore available homes"><ArrowUpRight size={18} /></Link>
+            </div>
+          </div>
+          <figcaption className="mt-4 flex flex-col gap-2 text-[11px] leading-relaxed sm:flex-row sm:items-center sm:justify-between" style={{ color: c.MUTED }}><span>Official model-home imagery. The assigned home is confirmed before payment.</span><span>Express Housing · Philadelphia</span></figcaption>
+        </motion.figure>
       </section>
     </div>
   );

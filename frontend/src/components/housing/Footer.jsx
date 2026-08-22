@@ -1,88 +1,62 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import { toast } from "sonner";
-import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Mail, MapPin } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
+
+const exploreLinks = [
+  ["Available homes", "/#stay-planner"],
+  ["Philadelphia locations", "/locations"],
+  ["My stays", "/dashboard"],
+];
+
+const companyLinks = [
+  ["About us", "/about"],
+  ["Testimonials", "/testimonials"],
+  ["Careers", "/careers"],
+  ["FAQ", "/faq"],
+];
+
+function FooterLinks({ title, links }) {
+  return (
+    <div>
+      <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/35">{title}</p>
+      <ul className="mt-5 space-y-1">{links.map(([label, to]) => <li key={label}><Link to={to} className="group inline-flex min-h-10 items-center gap-1.5 text-[13px] font-bold text-white/65 transition-colors hover:text-white">{label}<ArrowUpRight size={12} className="opacity-0 transition-opacity group-hover:opacity-100" /></Link></li>)}</ul>
+    </div>
+  );
+}
 
 export default function Footer() {
-  const [email, setEmail] = useState("");
-
-  const subscribe = (e) => {
-    e.preventDefault();
-    if (!email.includes("@")) return toast.error("Please enter a valid email");
-    toast.success("You're subscribed! Philadelphia stay guides coming your way.");
-    setEmail("");
-  };
+  const { colors: c } = useTheme();
 
   return (
-    <footer className="bg-[#212529] text-white mt-20">
-      {/* Newsletter strip */}
-      <div className="border-b border-white/10">
-        <div className="eh-container py-10 flex flex-col md:flex-row items-center justify-between gap-6">
+    <footer className="overflow-hidden text-white" style={{ background: "#141414" }}>
+      <div className="eh-container">
+        <section className="grid gap-10 border-b border-white/15 py-14 md:grid-cols-[1fr_auto] md:items-end md:py-20" aria-labelledby="footer-heading">
           <div>
-            <p className="eyebrow mb-1">Stay in the loop</p>
-            <h4 className="text-lg font-bold">Philadelphia stay guides & new listings, monthly.</h4>
+            <div className="flex items-center gap-3"><span className="h-0.5 w-8" style={{ background: "#6597FF" }} aria-hidden="true" /><p className="text-[10px] font-bold uppercase tracking-[0.24em] text-white/45">Your Philadelphia stay</p></div>
+            <h2 id="footer-heading" className="mt-7 max-w-[780px] text-[40px] font-extrabold leading-[0.93] tracking-[-0.05em] sm:text-[52px] md:text-[68px]">A furnished home.<br />A clearer arrival.</h2>
+            <p className="mt-6 max-w-xl text-[13px] leading-relaxed text-white/45">Managed furnished stays across a focused collection of Philadelphia buildings, with reservation and arrival details organized in one place.</p>
           </div>
-          <form onSubmit={subscribe} className="flex w-full md:w-auto gap-2" data-testid="newsletter-form">
-            <input
-              className="input-eh !bg-white/10 !border-white/20 !text-white placeholder:text-white/40 md:w-72"
-              placeholder="Your email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              data-testid="newsletter-input"
-            />
-            <button type="submit" className="btn-eh whitespace-nowrap">Subscribe</button>
-          </form>
-        </div>
-      </div>
+          <Link to="/#stay-planner" className="inline-flex min-h-12 shrink-0 items-center gap-2 justify-self-start rounded-full px-6 text-[13px] font-bold text-white transition-transform hover:-translate-y-0.5" style={{ background: c.BLUE }}>Explore available homes <ArrowRight size={16} /></Link>
+        </section>
 
-      <div className="eh-container py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
-        <div className="col-span-2 md:col-span-1">
-          <p className="text-base font-extrabold tracking-[0.18em] uppercase">
-            Express<span className="text-[#bd744c]">Housing</span>
-          </p>
-          <p className="text-sm text-white/60 mt-3 leading-relaxed">
-            Flexible furnished apartments in Philadelphia for business, medical, family, and international stays. Rented through the city’s best apartment communities, hosted by us.
-          </p>
-          <div className="flex gap-3 mt-4">
-            {[Facebook, Instagram, Twitter, Linkedin].map((Icon, i) => (
-              <span key={i} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#bd744c] transition-colors cursor-pointer">
-                <Icon size={14} />
-              </span>
-            ))}
+        <section className="grid gap-12 py-12 sm:grid-cols-2 lg:grid-cols-[1.2fr_0.65fr_0.65fr_0.9fr] lg:gap-16" aria-label="Footer navigation and contact">
+          <div>
+            <p className="text-[18px] font-extrabold tracking-[-0.03em]">Express Housing</p>
+            <p className="mt-4 max-w-xs text-[12px] leading-relaxed text-white/40">Furnished homes for business travel, medical visits, relocation, and extended stays in Philadelphia.</p>
+            <p className="mt-6 flex items-center gap-2 text-[11px] font-bold text-white/55"><MapPin size={14} color="#6597FF" /> Philadelphia, Pennsylvania</p>
           </div>
-        </div>
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/50 mb-4">Explore</p>
-          <ul className="space-y-2.5 text-sm">
-            <li><Link to="/apartments" className="text-white/80 hover:text-[#bd744c]">All Apartments</Link></li>
-            <li><Link to="/apartments?apt_type=Studio" className="text-white/80 hover:text-[#bd744c]">Studios</Link></li>
-            <li><Link to="/apartments?apt_type=2%20Bedroom" className="text-white/80 hover:text-[#bd744c]">2 Bedrooms</Link></li>
-            <li><Link to="/apartments?apt_type=Penthouse" className="text-white/80 hover:text-[#bd744c]">Penthouses</Link></li>
-          </ul>
-        </div>
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/50 mb-4">Stay Paths</p>
-          <ul className="space-y-2.5 text-sm">
-            <li><Link to="/apartments?stay_path=corporate" className="text-white/80 hover:text-[#bd744c]">Corporate Housing</Link></li>
-            <li><Link to="/apartments?stay_path=medical" className="text-white/80 hover:text-[#bd744c]">Medical Travelers</Link></li>
-            <li><Link to="/apartments?stay_path=family" className="text-white/80 hover:text-[#bd744c]">Families & Relocation</Link></li>
-          </ul>
-        </div>
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/50 mb-4">Company</p>
-          <ul className="space-y-2.5 text-sm">
-            <li><Link to="/contact" className="text-white/80 hover:text-[#bd744c]">Contact Us</Link></li>
-            <li><Link to="/dashboard" className="text-white/80 hover:text-[#bd744c]">My Stays</Link></li>
-            <li><Link to="/login" className="text-white/80 hover:text-[#bd744c]">Sign In</Link></li>
-          </ul>
-        </div>
-      </div>
+          <FooterLinks title="Explore" links={exploreLinks} />
+          <FooterLinks title="Company" links={companyLinks} />
+          <div>
+            <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/35">Need help?</p>
+            <p className="mt-5 max-w-xs text-[12px] leading-relaxed text-white/45">Questions about availability, an existing stay, or a building partnership?</p>
+            <Link to="/contact" className="mt-4 inline-flex min-h-10 items-center gap-2 text-[13px] font-bold" style={{ color: "#80A7FF" }}>Contact us <ArrowRight size={14} /></Link>
+            <a href="mailto:stay@expresshousing.com" className="mt-2 flex min-h-10 items-center gap-2 text-[11px] text-white/45 hover:text-white"><Mail size={13} /> stay@expresshousing.com</a>
+          </div>
+        </section>
 
-      <div className="border-t border-white/10">
-        <div className="eh-container py-5 flex flex-col md:flex-row items-center justify-between gap-2 text-xs text-white/40">
-          <span>© 2025 Express Housing. Philadelphia, PA. All rights reserved.</span>
-          <span>Furnished stays from 2 nights to 12 months.</span>
-        </div>
+        <div className="flex flex-col gap-3 py-6 text-[10px] text-white/30 sm:flex-row sm:items-center sm:justify-between"><span>© 2026 Express Housing. Philadelphia, PA.</span><span>Furnished stays · Managed arrival · Guest support</span></div>
       </div>
     </footer>
   );

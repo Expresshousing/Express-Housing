@@ -1,16 +1,21 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
 import api from "@/lib/api";
 import Header from "@/components/housing/Header";
 import Footer from "@/components/housing/Footer";
 import HomePage from "@/components/housing/HomePage";
-import ApartmentsPage from "@/components/housing/ApartmentsPage";
 import ApartmentDetailPage from "@/components/housing/ApartmentDetailPage";
-import { LoginPage, SignupPage } from "@/components/housing/AuthPages";
 import DashboardPage from "@/components/housing/DashboardPage";
 import AdminPage from "@/components/housing/AdminPage";
+import PartnerDashboard from "@/components/housing/PartnerDashboard";
 import ContactPage from "@/components/housing/ContactPage";
+import FaqPage from "@/components/housing/FaqPage";
+import AboutPage from "@/components/housing/AboutPage";
+import TestimonialsPage from "@/components/housing/TestimonialsPage";
+import LocationsPage from "@/components/housing/LocationsPage";
+import CareersPage from "@/components/housing/CareersPage";
+import { useTheme } from "@/context/ThemeContext";
 import "@/App.css";
 
 // ===== Auth Context =====
@@ -83,28 +88,45 @@ const ScrollToTop = () => {
   return null;
 };
 
+const ApartmentsRedirect = () => {
+  const location = useLocation();
+  return <Navigate replace to={{ pathname: "/", search: location.search, hash: "#stay-planner" }} />;
+};
+
+const AuthRedirect = ({ mode }) => {
+  const location = useLocation();
+  return <Navigate replace to="/" state={{ authMode: mode, from: location.state?.from }} />;
+};
+
 function App() {
+  const { colors: c, isDarkMode } = useTheme();
   return (
     <AuthProvider>
       <BrowserRouter>
         <ScrollToTop />
-        <div className="min-h-screen bg-white flex flex-col">
+        <div className="min-h-screen flex flex-col transition-colors" style={{ background: c.BG, color: c.TEXT, fontFamily: c.INTER }}>
           <Header />
           <main className="flex-1">
             <Routes>
               <Route path="/" element={<HomePage />} />
-              <Route path="/apartments" element={<ApartmentsPage />} />
+              <Route path="/apartments" element={<ApartmentsRedirect />} />
               <Route path="/apartments/:id" element={<ApartmentDetailPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignupPage />} />
+              <Route path="/login" element={<AuthRedirect mode="login" />} />
+              <Route path="/signup" element={<AuthRedirect mode="signup" />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/admin" element={<AdminPage />} />
+              <Route path="/partner" element={<PartnerDashboard />} />
               <Route path="/contact" element={<ContactPage />} />
+              <Route path="/faq" element={<FaqPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/testimonials" element={<TestimonialsPage />} />
+              <Route path="/locations" element={<LocationsPage />} />
+              <Route path="/careers" element={<CareersPage />} />
             </Routes>
           </main>
           <Footer />
         </div>
-        <Toaster position="top-center" richColors />
+        <Toaster position="top-center" richColors theme={isDarkMode ? "dark" : "light"} />
       </BrowserRouter>
     </AuthProvider>
   );

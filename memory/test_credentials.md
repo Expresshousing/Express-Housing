@@ -1,14 +1,7 @@
 # Express Housing Test Credentials
 
-## Guest account
-- Email: guest@expresshousing.com
-- Password: stay2025
+Credentials are no longer committed to this repository.
 
-## Admin account (access /admin dashboard)
-- Email: admin@expresshousing.com
-- Password: admin2025
-- Seeded automatically on backend startup
-
-## Second admin (created via Team tab test)
-- Email: admin2@expresshousing.com
-- Password: admin2pass
+For a local bootstrap administrator, set `BOOTSTRAP_ADMIN_EMAIL` and
+`BOOTSTRAP_ADMIN_PASSWORD` in `backend/.env`. Automated tests create isolated
+users in an in-memory database and do not require a shared account.

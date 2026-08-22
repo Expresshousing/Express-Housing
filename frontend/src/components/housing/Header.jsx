@@ -1,185 +1,248 @@
-import React, { useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
-import { Heart, User, Menu, X, Search } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import {
+  Building2,
+  Heart,
+  MapPin,
+  Menu,
+  Moon,
+  Sun,
+  UserRound,
+  X,
+} from "lucide-react";
 import { useAuth } from "@/App";
+import { useTheme } from "@/context/ThemeContext";
+import { cardStyle, iconTileStyle } from "@/lib/designSystem";
+import AuthDialog from "@/components/housing/AuthDialog";
 
-const navLinks = [
-  { to: "/", label: "Home" },
-  { to: "/apartments", label: "Apartments" },
-  { to: "/apartments?stay_path=corporate", label: "Corporate Housing" },
-  { to: "/contact", label: "Contact" },
+const primaryLinks = [
+  { label: "Testimonials", to: "/testimonials" },
+  { label: "About us", to: "/about" },
+  { label: "Contact us", to: "/contact" },
+  { label: "Careers", to: "/careers" },
+  { label: "FAQ", to: "/faq" },
 ];
 
 export default function Header() {
   const { user, logout, wishlistIds } = useAuth();
+  const { colors: c, isDarkMode, toggleTheme } = useTheme();
+  const location = useLocation();
   const navigate = useNavigate();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
+  const [scrolled, setScrolled] = useState(false);
+  const [heroHeight, setHeroHeight] = useState(0);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState("login");
+  const [authReturnTo, setAuthReturnTo] = useState(null);
 
-  const submitSearch = (e) => {
-    e.preventDefault();
-    setSearchOpen(false);
-    navigate(`/apartments?search=${encodeURIComponent(searchValue)}`);
+  const isHome = location.pathname === "/";
+  const overlay = isHome && !scrolled && !accountOpen;
+  const foreground = overlay ? "#FFFFFF" : c.TEXT;
+  const secondary = overlay ? "rgba(255,255,255,0.78)" : c.MUTED;
+  const accountHref = user?.role === "admin" ? "/admin" : user?.role === "building_partner" ? "/partner" : "/dashboard";
+  const accountLabel = user ? user.name.split(" ")[0] : "Sign in";
+
+  useEffect(() => {
+    if (!isHome) { setHeroHeight(0); return undefined; }
+    const measure = () => setHeroHeight(document.getElementById("stay-planner")?.offsetHeight || 0);
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [isHome, location.pathname]);
+
+  useEffect(() => {
+    // On the homepage, the hero is the full-height video tour, so the
+    // overlay header should stay blended with it through the whole
+    // cinematic scroll — not flip solid after the first few pixels.
+    const threshold = Math.max(16, heroHeight - 96);
+    const onScroll = () => setScrolled(window.scrollY > threshold);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [heroHeight]);
+
+  useEffect(() => {
+    setAccountOpen(false);
+  }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    const requestedMode = location.state?.authMode;
+    if (requestedMode !== "login" && requestedMode !== "signup") return;
+    setAuthMode(requestedMode);
+    setAuthReturnTo(location.state?.from || null);
+    setAuthOpen(true);
+    navigate(`${location.pathname}${location.search}${location.hash}`, { replace: true, state: null });
+  }, [location.hash, location.pathname, location.search, location.state, navigate]);
+
+  useEffect(() => {
+    const onEscape = (event) => {
+      if (event.key === "Escape") {
+        setAccountOpen(false);
+      }
+    };
+    window.addEventListener("keydown", onEscape);
+    return () => window.removeEventListener("keydown", onEscape);
+  }, []);
+
+  const dropdownSurface = cardStyle(c, isDarkMode, { padding: 8, radius: 16 });
+  const closeMenus = () => {
+    setAccountOpen(false);
   };
 
+  const toggleAccount = () => {
+    setAccountOpen((open) => !open);
+  };
+
+  const openAuth = (mode = "login") => {
+    const requestedMode = mode === "signup" ? "signup" : "login";
+    closeMenus();
+    setAuthMode(requestedMode);
+    setAuthReturnTo(null);
+    setAuthOpen(true);
+  };
+
+  const navLinkStyle = ({ isActive }) => ({
+    color: isActive ? foreground : secondary,
+    fontWeight: isActive ? 800 : 700,
+  });
+
   return (
-    <header className="sticky top-0 z-50 bg-white">
-      {/* Announcement bar */}
-      <div className="bg-[#bd744c] text-white text-center text-[11px] font-semibold tracking-[0.15em] uppercase py-2 px-4">
-        Flexible furnished stays in Philadelphia — from 2 nights to 12 months
-      </div>
-
-      {/* Main header */}
-      <div className="border-b border-gray-200">
-        <div className="eh-container flex items-center justify-between h-16 md:h-20">
-          {/* Mobile menu button */}
-          <button
-            className="md:hidden p-2 -ml-2"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Menu"
-            data-testid="mobile-menu-btn"
+    <>
+      <header
+        className="fixed inset-x-0 top-0 z-50 transition-normal"
+        style={{
+          height: 80,
+          background: overlay ? "transparent" : `${c.CARD}F5`,
+          color: foreground,
+          borderBottom: `1px solid ${overlay ? "transparent" : c.BORDER}`,
+          backdropFilter: overlay ? "none" : "blur(14px)",
+          WebkitBackdropFilter: overlay ? "none" : "blur(14px)",
+        }}
+        data-testid="site-header"
+      >
+        <div className="relative mx-auto flex h-full w-full max-w-[1280px] items-center justify-between gap-5 px-4 md:px-6">
+          <Link
+            to="/"
+            className="flex h-14 w-[148px] shrink-0 items-center leading-none md:w-[160px]"
+            style={{ color: foreground }}
+            data-testid="logo"
+            aria-label="Express Housing home"
           >
-            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
-
-          {/* Logo */}
-          <Link to="/" className="flex flex-col items-center md:items-start leading-none" data-testid="logo">
-            <span className="text-lg md:text-xl font-extrabold tracking-[0.18em] uppercase text-[#212529]">
-              Express<span className="text-[#bd744c]">Housing</span>
-            </span>
-            <span className="hidden md:block text-[9px] tracking-[0.35em] uppercase text-gray-400 mt-1">
-              Flexible Furnished Stays
-            </span>
+            <span className="whitespace-nowrap text-[17px] font-extrabold tracking-[-0.03em]">Express Housing</span>
           </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((l) => (
-              <NavLink
-                key={l.label}
-                to={l.to}
-                className="text-[13px] font-semibold uppercase tracking-wider text-[#212529] hover:text-[#bd744c] transition-colors"
-              >
-                {l.label}
+          <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary navigation">
+            {primaryLinks.map((item) => (
+              <NavLink key={item.label} to={item.to} className="nav-btn flex min-h-11 items-center rounded-xl px-2 text-[15px]" style={navLinkStyle}>
+                {item.label}
               </NavLink>
             ))}
           </nav>
 
-          {/* Icons */}
-          <div className="flex items-center gap-1 md:gap-3">
+          <div
+            className="flex min-h-[50px] shrink-0 items-center rounded-full border p-1.5"
+            style={{
+              background: overlay ? "rgba(255,255,255,0.08)" : c.CARD,
+              borderColor: overlay ? "rgba(255,255,255,0.44)" : c.BORDER,
+            }}
+          >
             <button
-              onClick={() => setSearchOpen(!searchOpen)}
-              className="p-2 hover:text-[#bd744c] transition-colors"
-              aria-label="Search"
-              data-testid="header-search-btn"
+              type="button"
+              className="nav-btn flex h-11 w-11 items-center justify-center rounded-full"
+              style={{ color: foreground }}
+              onClick={toggleAccount}
+              aria-label={accountOpen ? "Close menu" : "Open menu"}
+              aria-expanded={accountOpen}
+              data-testid="mobile-menu-btn"
             >
-              <Search size={19} />
+              {accountOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
-            <Link
-              to={user ? "/dashboard?tab=saved" : "/login"}
-              className="relative p-2 hover:text-[#bd744c] transition-colors"
-              aria-label="Saved apartments"
-              data-testid="header-wishlist-btn"
-            >
-              <Heart size={19} />
-              {wishlistIds.length > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-[#bd744c] text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                  {wishlistIds.length}
-                </span>
-              )}
-            </Link>
-            {user ? (
-              <div className="hidden md:flex items-center gap-3">
-                {user.role === "admin" && (
-                  <Link
-                    to="/admin"
-                    className="text-[13px] font-bold uppercase tracking-wider text-[#bd744c] hover:underline"
-                    data-testid="header-admin-link"
-                  >
-                    Admin
-                  </Link>
-                )}
-                <Link
-                  to="/dashboard"
-                  className="flex items-center gap-1.5 text-[13px] font-semibold uppercase tracking-wider hover:text-[#bd744c]"
-                  data-testid="header-dashboard-link"
-                >
-                  <User size={17} />
-                  {user.name.split(" ")[0]}
-                </Link>
-                <button
-                  onClick={() => { logout(); navigate("/"); }}
-                  className="text-[12px] font-semibold uppercase tracking-wider text-gray-400 hover:text-[#212529]"
-                  data-testid="header-logout-btn"
-                >
-                  Logout
-                </button>
-              </div>
-            ) : (
-              <Link
-                to="/login"
-                className="hidden md:inline-flex btn-eh !py-2.5 !px-5"
-                data-testid="header-login-btn"
-              >
-                Sign In
-              </Link>
-            )}
-          </div>
-        </div>
-
-        {/* Search drawer */}
-        {searchOpen && (
-          <div className="border-t border-gray-100 bg-white">
-            <form onSubmit={submitSearch} className="eh-container py-3 flex gap-2">
-              <input
-                autoFocus
-                className="input-eh"
-                placeholder="Search by neighborhood, building, or apartment name..."
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                data-testid="header-search-input"
-              />
-              <button type="submit" className="btn-eh">Search</button>
-            </form>
-          </div>
-        )}
-
-        {/* Mobile nav */}
-        {mobileOpen && (
-          <nav className="md:hidden border-t border-gray-100 bg-white px-4 py-4 flex flex-col gap-4" data-testid="mobile-nav">
-            {navLinks.map((l) => (
-              <NavLink
-                key={l.label}
-                to={l.to}
-                onClick={() => setMobileOpen(false)}
-                className="text-sm font-semibold uppercase tracking-wider text-[#212529]"
-              >
-                {l.label}
-              </NavLink>
-            ))}
             {user ? (
               <>
-                {user.role === "admin" && (
-                  <NavLink to="/admin" onClick={() => setMobileOpen(false)} className="text-sm font-bold uppercase tracking-wider text-[#bd744c]">
-                    Admin
-                  </NavLink>
-                )}
-                <NavLink to="/dashboard" onClick={() => setMobileOpen(false)} className="text-sm font-semibold uppercase tracking-wider text-[#bd744c]">
-                  My Stays
-                </NavLink>
-                <button onClick={() => { logout(); setMobileOpen(false); navigate("/"); }} className="text-left text-sm font-semibold uppercase tracking-wider text-gray-400">
-                  Logout
-                </button>
+                <Link
+                  to={accountHref}
+                  className="hidden min-h-11 items-center px-2 text-[15px] font-bold sm:flex"
+                  style={{ color: foreground }}
+                  data-testid="header-dashboard-link"
+                >
+                  {accountLabel}
+                </Link>
+                <Link
+                  to={accountHref}
+                  className="flex h-11 w-11 items-center justify-center rounded-full"
+                  style={{ background: overlay ? "#FFFFFF" : c.TEXT, color: overlay ? "#111111" : c.BG }}
+                  aria-label={`Open ${accountLabel}'s account`}
+                >
+                  <UserRound size={22} />
+                </Link>
               </>
             ) : (
-              <NavLink to="/login" onClick={() => setMobileOpen(false)} className="btn-eh w-full">
-                Sign In
-              </NavLink>
+              <>
+                <button
+                  type="button"
+                  onClick={openAuth}
+                  className="hidden min-h-11 items-center px-2 text-[15px] font-bold sm:flex"
+                  style={{ color: foreground }}
+                  data-testid="header-login-btn"
+                >
+                  Sign in
+                </button>
+                <button
+                  type="button"
+                  onClick={openAuth}
+                  className="flex h-11 w-11 items-center justify-center rounded-full"
+                  style={{ background: overlay ? "#FFFFFF" : c.TEXT, color: overlay ? "#111111" : c.BG }}
+                  aria-label="Sign in"
+                >
+                  <UserRound size={22} />
+                </button>
+              </>
             )}
-          </nav>
-        )}
-      </div>
-    </header>
+          </div>
+
+          {accountOpen && (
+            <nav
+              className="panel-enter absolute right-4 top-[calc(100%+10px)] w-[min(330px,calc(100vw-32px))] md:right-6 lg:w-[320px]"
+              style={dropdownSurface}
+              data-testid="mobile-nav"
+              aria-label="Account and mobile navigation"
+            >
+              <div className="space-y-1 lg:hidden">
+                <p className="px-3 pb-1 pt-2 text-[11px] font-extrabold uppercase tracking-[0.06em]" style={{ color: c.MUTED }}>Explore</p>
+                {primaryLinks.map((item) => <Link key={item.label} to={item.to} onClick={closeMenus} className="nav-btn flex min-h-11 items-center rounded-xl px-3 text-[15px] font-semibold" style={{ color: c.TEXT }}>{item.label}</Link>)}
+                <div className="my-2" style={{ borderTop: `1px solid ${c.BORDER}` }} />
+              </div>
+
+              <Link to={user ? "/dashboard?tab=saved" : "/login"} onClick={closeMenus} className="nav-btn flex min-h-11 items-center justify-between rounded-xl px-3 text-[13px] font-semibold" style={{ color: c.TEXT }} data-testid="header-wishlist-btn">
+                <span className="flex items-center gap-3"><Heart size={17} /> Saved apartments</span>
+                {wishlistIds.length > 0 && <span className="rounded-full px-2 py-1 text-[11px] font-extrabold" style={{ background: `${c.BLUE}12`, color: c.BLUE }}>{wishlistIds.length}</span>}
+              </Link>
+              <Link to="/#stay-planner" onClick={closeMenus} className="nav-btn flex min-h-11 items-center gap-3 rounded-xl px-3 text-[13px] font-semibold" style={{ color: c.TEXT }} data-testid="header-search-btn">
+                <MapPin size={17} /> Find a stay
+              </Link>
+              <button type="button" onClick={toggleTheme} className="nav-btn flex min-h-11 w-full items-center justify-between rounded-xl px-3 text-left text-[13px] font-semibold" style={{ color: c.TEXT }} aria-label={isDarkMode ? "Switch to light theme" : "Switch to dark theme"} data-testid="theme-toggle">
+                <span className="flex items-center gap-3">{isDarkMode ? <Sun size={17} /> : <Moon size={17} />} {isDarkMode ? "Light appearance" : "Dark appearance"}</span>
+                <span style={iconTileStyle(c.BLUE, 32, 8)}>{isDarkMode ? <Sun size={15} /> : <Moon size={15} />}</span>
+              </button>
+
+              {user ? (
+                <>
+                  {(user.role === "admin" || user.role === "building_partner") && (
+                    <Link to={accountHref} onClick={closeMenus} className="nav-btn flex min-h-11 items-center gap-3 rounded-xl px-3 text-[13px] font-semibold" style={{ color: c.BLUE }} data-testid={user.role === "admin" ? "header-admin-link" : "header-partner-link"}>
+                      <Building2 size={17} /> {user.role === "admin" ? "Operations" : "Building Portal"}
+                    </Link>
+                  )}
+                  <button type="button" onClick={() => { logout(); closeMenus(); navigate("/"); }} className="nav-btn flex min-h-11 w-full items-center rounded-xl px-3 text-left text-[13px] font-semibold" style={{ color: c.MUTED }} data-testid="header-logout-btn">Logout</button>
+                </>
+              ) : (
+                <button type="button" onClick={openAuth} className="btn-eh mt-2 w-full" data-testid="header-menu-login-btn">Sign in</button>
+              )}
+            </nav>
+          )}
+        </div>
+      </header>
+      {!isHome && <div aria-hidden="true" style={{ height: 80 }} />}
+      <AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} initialMode={authMode} returnTo={authReturnTo} />
+    </>
   );
 }
