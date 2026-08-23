@@ -36,6 +36,7 @@ import { todayISO } from "@/lib/date";
 import { useAuth } from "@/App";
 import { useTheme } from "@/context/ThemeContext";
 import { cardStyle, iconTileStyle, microBadgeStyle, pageStyle } from "@/lib/designSystem";
+import ApartmentGallery from "@/components/housing/apartmentGallery";
 
 const PURPOSES = [{ value: "business", label: "Business travel" }, { value: "medical", label: "Medical stay" }, { value: "family", label: "Family visit" }, { value: "relocation", label: "Relocation" }, { value: "leisure", label: "Leisure" }];
 
@@ -120,6 +121,7 @@ export default function ApartmentDetailPage() {
   const [unavailable, setUnavailable] = useState([]);
   const [unavailableLoaded, setUnavailableLoaded] = useState(false);
   const [mainImg, setMainImg] = useState(0);
+  const [galleryOpen, setGalleryOpen] = useState(false);
   const [checkIn, setCheckIn] = useState(() => searchParams.get("check_in") || "");
   const [checkOut, setCheckOut] = useState(() => searchParams.get("check_out") || "");
   const [guests, setGuests] = useState(() => Math.max(1, Number(searchParams.get("guests")) || 1));
@@ -133,6 +135,7 @@ export default function ApartmentDetailPage() {
   useEffect(() => {
     setNotFound(false);
     setMainImg(0);
+    setGalleryOpen(false);
     setUnavailableLoaded(false);
     api.get(`/apartments/${id}`).then((response) => setApt(response.data)).catch(() => setNotFound(true));
     api.get(`/apartments/${id}/unavailable`)
@@ -240,20 +243,28 @@ export default function ApartmentDetailPage() {
     { icon: Building2, title: "Professionally managed", description: `A furnished Express Housing stay inside ${apt.building_name}.` },
     { icon: ShieldCheck, title: "Review before payment", description: "Dates, fees, policies, and the amount due are shown before a payment step." },
   ];
+  const openGallery = (index = mainImg) => {
+    setMainImg(index);
+    setGalleryOpen(true);
+  };
 
   return (
     <div style={pageStyle(c)} data-testid="apartment-detail">
+      <ApartmentGallery images={apt.images} index={mainImg} onIndexChange={setMainImg} open={galleryOpen} onOpenChange={setGalleryOpen} title={apt.title} photoTour={apt.photo_tour} />
       <div className="relative left-1/2 h-[70svh] max-h-[780px] min-h-[520px] w-[100dvw] max-w-none -translate-x-1/2 overflow-hidden" style={{ background: "#0A0A0A" }}>
         {apt.images?.length ? (
-          <motion.img
+          <motion.button
             key={mainImg}
-            src={apt.images[mainImg]}
-            alt={apt.title}
-            className="absolute inset-0 h-full w-full object-cover"
+            type="button"
+            onClick={() => openGallery(mainImg)}
+            className="absolute inset-0 h-full w-full cursor-zoom-in overflow-hidden"
+            aria-label={`Open photo gallery at photo ${mainImg + 1}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
-          />
+          >
+            <img src={apt.images[mainImg]} alt={`${apt.title}${apt.photo_tour?.[mainImg]?.room ? `, ${apt.photo_tour[mainImg].room}` : ""}`} className="h-full w-full object-cover" />
+          </motion.button>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-10 text-center">
             <div style={iconTileStyle("#FFFFFF", 56, 16)}><ImageIcon size={24} /></div>
@@ -261,7 +272,7 @@ export default function ApartmentDetailPage() {
             <p className="mt-2 max-w-sm text-[13px] text-white/70">Verified unit photography is coming soon.</p>
           </div>
         )}
-        <div className="absolute inset-0" style={{ background: "linear-gradient(0deg, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.16) 52%, rgba(10,10,10,0.42) 100%)" }} />
+        <div className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(0deg, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.16) 52%, rgba(10,10,10,0.42) 100%)" }} />
 
         <div className="absolute inset-x-0 top-0 flex items-center justify-between p-4 md:p-6">
           <button type="button" onClick={() => navigate(-1)} className="flex h-11 w-11 items-center justify-center rounded-full border text-white" style={{ borderColor: "rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)" }} aria-label="Back"><ChevronLeft size={20} /></button>
@@ -270,7 +281,7 @@ export default function ApartmentDetailPage() {
 
         {apt.photo_tour?.[mainImg]?.room && <span className="absolute left-4 top-[64px] md:left-6" style={{ ...microBadgeStyle("#FFFFFF"), background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.3)", backdropFilter: "blur(8px)" }} data-testid="photo-room-label">{apt.photo_tour[mainImg].room}</span>}
 
-        <div className="eh-container absolute inset-x-0 bottom-0 pb-10 md:pb-14">
+        <div className="eh-container pointer-events-none absolute inset-x-0 bottom-0 pb-10 md:pb-14">
           <p className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.18em] text-white/80"><MapPin size={15} /> {apt.neighborhood} · {apt.building_name}</p>
           <h1 className="mt-5 max-w-4xl text-[46px] font-extrabold leading-[0.94] text-white sm:text-[60px] md:text-[76px]">{apt.title}</h1>
           <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px] font-semibold text-white/80">
@@ -284,7 +295,7 @@ export default function ApartmentDetailPage() {
       <div className="eh-container pb-20 pt-6 md:pt-8">
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
         <div className="lg:col-span-7">
-          {apt.images?.length > 0 && <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">{apt.images.map((image, index) => <button type="button" key={image} onClick={() => setMainImg(index)} className="group relative aspect-[4/3] overflow-hidden rounded-2xl" style={{ border: `1px solid ${index === mainImg ? c.BLUE : c.BORDER}`, opacity: index === mainImg ? 1 : 0.78 }} aria-label={`View photo ${index + 1}`}><img src={image} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" /></button>)}</div>}
+          {apt.images?.length > 0 && <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">{apt.images.map((image, index) => <button type="button" key={`${image}-${index}`} onClick={() => openGallery(index)} className="group relative aspect-[4/3] cursor-zoom-in overflow-hidden rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" style={{ border: `1px solid ${index === mainImg ? c.BLUE : c.BORDER}`, opacity: index === mainImg ? 1 : 0.78, "--tw-ring-color": c.BLUE }} aria-label={`Open photo ${index + 1} of ${apt.images.length} in gallery`}><img src={image} alt={`${apt.title}${apt.photo_tour?.[index]?.room ? `, ${apt.photo_tour[index].room}` : ""}`} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" /></button>)}</div>}
           {apt.image_scope === "building_and_model_not_assigned_unit" && <div className="mt-3"><ToneNotice color={c.ORANGE}>These authorized photos show building amenities or model homes. They do not promise the exact layout, furniture, view, or finishes of the assigned unit.</ToneNotice></div>}
 
           <DetailSection id="stay-highlights" eyebrow="At a glance" title="Stay highlights" description="The essentials guests usually need before deciding whether a home fits their stay." c={c}>
