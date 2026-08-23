@@ -131,6 +131,7 @@ export default function ApartmentDetailPage() {
   const [quote, setQuote] = useState(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const bookingStartRef = useRef(null);
 
   useEffect(() => {
     setNotFound(false);
@@ -251,7 +252,7 @@ export default function ApartmentDetailPage() {
   return (
     <div style={pageStyle(c)} data-testid="apartment-detail">
       <ApartmentGallery images={apt.images} index={mainImg} onIndexChange={setMainImg} open={galleryOpen} onOpenChange={setGalleryOpen} title={apt.title} photoTour={apt.photo_tour} />
-      <div className="relative left-1/2 h-[70svh] max-h-[780px] min-h-[520px] w-[100dvw] max-w-none -translate-x-1/2 overflow-hidden" style={{ background: "#0A0A0A" }}>
+      <div className="relative left-1/2 h-[58svh] max-h-[780px] min-h-[430px] w-[100dvw] max-w-none -translate-x-1/2 overflow-hidden sm:h-[70svh] sm:min-h-[520px]" style={{ background: "#0A0A0A" }}>
         {apt.images?.length ? (
           <motion.button
             key={mainImg}
@@ -293,10 +294,61 @@ export default function ApartmentDetailPage() {
       </div>
 
       <div className="eh-container pb-20 pt-6 md:pt-8">
-      <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
-        <div className="lg:col-span-7">
-          {apt.images?.length > 0 && <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">{apt.images.map((image, index) => <button type="button" key={`${image}-${index}`} onClick={() => openGallery(index)} className="group relative aspect-[4/3] cursor-zoom-in overflow-hidden rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" style={{ border: `1px solid ${index === mainImg ? c.BLUE : c.BORDER}`, opacity: index === mainImg ? 1 : 0.78, "--tw-ring-color": c.BLUE }} aria-label={`Open photo ${index + 1} of ${apt.images.length} in gallery`}><img src={image} alt={`${apt.title}${apt.photo_tour?.[index]?.room ? `, ${apt.photo_tour[index].room}` : ""}`} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" /></button>)}</div>}
-          {apt.image_scope === "building_and_model_not_assigned_unit" && <div className="mt-3"><ToneNotice color={c.ORANGE}>These authorized photos show building amenities or model homes. They do not promise the exact layout, furniture, view, or finishes of the assigned unit.</ToneNotice></div>}
+      <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-x-16 lg:gap-y-0">
+        <div className="hidden sm:block lg:col-span-7 lg:row-start-1">
+          {apt.images?.length > 0 && <div className="hidden grid-cols-2 gap-3 sm:grid sm:grid-cols-4">{apt.images.map((image, index) => <button type="button" key={`${image}-${index}`} onClick={() => openGallery(index)} className="group relative aspect-[4/3] cursor-zoom-in overflow-hidden rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" style={{ border: `1px solid ${index === mainImg ? c.BLUE : c.BORDER}`, opacity: index === mainImg ? 1 : 0.78, "--tw-ring-color": c.BLUE }} aria-label={`Open photo ${index + 1} of ${apt.images.length} in gallery`}><img src={image} alt={`${apt.title}${apt.photo_tour?.[index]?.room ? `, ${apt.photo_tour[index].room}` : ""}`} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" /></button>)}</div>}
+        </div>
+
+        <aside className="lg:col-span-5 lg:col-start-8 lg:row-span-2 lg:row-start-1 lg:self-stretch"><div className="rounded-[20px] border p-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:p-7" style={{ background: c.CARD, borderColor: c.BORDER, boxShadow: isDarkMode ? "none" : "0 8px 30px rgba(0,0,0,0.08)" }}>
+          <div className="mb-5 lg:hidden">
+            <p className="text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color: c.BLUE }}>Ready when you are</p>
+            <button type="button" className="btn-eh mt-3 flex min-h-14 w-full items-center justify-center gap-2 text-[16px]" onClick={() => bookingStartRef.current?.focus()} data-testid="mobile-book-apartment-cta">Book apartment <ArrowRight size={18} /></button>
+          </div>
+          {apt.listing_status === "draft" && <div className="mb-4"><ToneNotice color={c.ORANGE} testId="listing-verification-notice">Exact units, short-stay authorization, and final rates are still being verified. You can submit a no-charge availability request for the team to review.</ToneNotice></div>}
+          <p className="text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color: c.BLUE }}>Plan your stay</p>
+          <div className="mt-3 flex flex-wrap items-baseline gap-3"><strong className="text-[30px] font-extrabold">${Math.round(apt.nightly_rate)}<span className="text-[13px] font-medium" style={{ color: c.MUTED }}> / night</span></strong><span className="text-[13px] font-bold" style={{ color: c.BLUE }}>${apt.monthly_rate.toLocaleString()} / month</span></div><p className="mt-1.5 text-[11px] leading-relaxed" style={{ color: c.MUTED }}>Monthly rate is prorated for 30+ nights. Taxes and cleaning appear before request.</p>
+          <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 border-y py-4 text-[12px]" style={{ borderColor: c.BORDER, color: c.MUTED }}><span className="flex items-center gap-1.5"><BedDouble size={16} /> {apt.bedrooms === 0 ? "Studio" : `${apt.bedrooms} bedroom${apt.bedrooms === 1 ? "" : "s"}`}</span><span className="flex items-center gap-1.5"><Bath size={16} /> {apt.bathrooms ? `${apt.bathrooms} baths` : "Bath count varies"}</span><span className="flex items-center gap-1.5"><Users size={16} /> {apt.max_guests} guests</span><span className="flex items-center gap-1.5"><Ruler size={16} /> {apt.sqft ? `${apt.sqft.toLocaleString()} sqft` : "Size varies"}</span></div>
+
+          <div className="mt-6 space-y-4" data-testid="booking-panel">
+            {roomTypeOptions.length > 1 && (
+              <div>
+                <label className="label-eh">Room type</label>
+                <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${roomTypeOptions.length}, minmax(0, 1fr))` }} role="radiogroup" aria-label="Room type" data-testid="room-type-selector">
+                  {roomTypeOptions.map((option) => {
+                    const selected = option.id === apt.id;
+                    return (
+                      <button
+                        key={option.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        onClick={() => { if (!selected) navigate(`/apartments/${option.id}${queryString ? `?${queryString}` : ""}`, { replace: true }); }}
+                        className="min-h-11 rounded-xl border px-3 py-2 text-[13px] font-bold"
+                        style={{ borderColor: selected ? c.BLUE : c.BORDER, background: selected ? `${c.BLUE}12` : "transparent", color: selected ? c.BLUE : c.TEXT }}
+                        data-testid={`room-type-option-${option.bedrooms}`}
+                      >
+                        {option.bedrooms === 0 ? "Studio" : `${option.bedrooms} bedroom${option.bedrooms === 1 ? "" : "s"}`}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            <div className="grid grid-cols-2 gap-3"><div><label className="label-eh">Check-in</label><input ref={bookingStartRef} type="date" min={today} className="input-eh" value={checkIn} onChange={(event) => setCheckIn(event.target.value)} data-testid="booking-checkin" /></div><div><label className="label-eh">Check-out</label><input type="date" min={checkIn || today} className="input-eh" value={checkOut} onChange={(event) => setCheckOut(event.target.value)} data-testid="booking-checkout" /></div></div>
+            {conflict && <ToneNotice color={c.RED} testId="dates-conflict-warning">Those dates overlap an existing stay ({conflict.check_in} → {conflict.check_out}). Please choose different dates.</ToneNotice>}
+            {unavailable.length > 0 && <p className="text-[11px]" style={{ color: c.MUTED }} data-testid="unavailable-list"><strong>Already booked: </strong>{unavailable.map((item, index) => <span key={`${item.check_in}-${item.check_out}`}>{item.check_in} → {item.check_out}{index < unavailable.length - 1 ? " · " : ""}</span>)}</p>}
+            <div className="grid grid-cols-2 gap-3"><div><label className="label-eh">Guests</label><select className="input-eh" value={guests} onChange={(event) => setGuests(event.target.value)} data-testid="booking-guests">{[...Array(apt.max_guests)].map((_, index) => <option key={index + 1} value={index + 1}>{index + 1} {index === 0 ? "guest" : "guests"}</option>)}</select></div><div><label className="label-eh">Purpose</label><select className="input-eh" value={purpose} onChange={(event) => setPurpose(event.target.value)} data-testid="booking-purpose">{PURPOSES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></div></div>
+            <div><label className="label-eh">Notes <span style={{ color: c.MUTED }}>(optional)</span></label><textarea className="input-eh" rows={2} placeholder="Anything we should know?" value={notes} onChange={(event) => setNotes(event.target.value)} data-testid="booking-notes" /></div>
+            <label className="flex min-h-11 cursor-pointer items-start gap-3 text-[13px]" style={{ color: c.TEXT }}><input type="checkbox" className="mt-1" checked={parkingRequested} onChange={(event) => setParkingRequested(event.target.checked)} style={{ accentColor: c.BLUE }} /><span>Request parking <span className="block text-[11px]" style={{ color: c.MUTED }}>${(apt.parking_monthly || 0).toLocaleString()}/month. Short-stay parking is confirmed separately.</span></span></label>
+            {quoteLoading && <p className="text-[11px]" style={{ color: c.MUTED }}>Calculating taxes and fees…</p>}
+            {quote && <div className="space-y-2 rounded-xl p-4 text-[13px]" style={{ background: c.CARD2 }} data-testid="price-breakdown"><div className="flex justify-between" style={{ color: c.MUTED }}><span>{nights} nights {quote.rate_mode === "monthly_prorated" && "(monthly rate)"}</span><span>${quote.accommodation.toLocaleString()}</span></div><div className="flex justify-between" style={{ color: c.MUTED }}><span>Cleaning</span><span>${quote.cleaning_fee.toLocaleString()}</span></div>{quote.parking_fee > 0 && <div className="flex justify-between" style={{ color: c.MUTED }}><span>Parking</span><span>${quote.parking_fee.toLocaleString()}</span></div>}<div className="flex justify-between" style={{ color: c.MUTED }}><span>Philadelphia lodging taxes {quote.tax_rate > 0 ? `(${(quote.tax_rate * 100).toFixed(1)}%)` : "(not applied)"}</span><span>${quote.taxes.toLocaleString()}</span></div><div className="flex justify-between border-t pt-2 font-bold" style={{ borderColor: c.BORDER, color: c.TEXT }}><span>Estimated total</span><span>${quote.total.toLocaleString()}</span></div>{apt.pricing_status === "provisional" && <p className="pt-1 text-[10px]" style={{ color: c.ORANGE }}>Provisional pricing—final approval required before payment.</p>}</div>}
+            <button type="button" className="btn-eh w-full" onClick={requestBooking} disabled={submitting || !!conflict} data-testid="request-booking-btn">{submitting ? "Sending…" : conflict ? "Dates unavailable" : apt.accepting_reservations ? "Request to book" : "Request availability"}</button>
+            <p className="text-center text-[11px]" style={{ color: c.MUTED }}>No charge yet. Payment and access are separate verified steps.</p>
+          </div>
+        </div></aside>
+
+        <div className="lg:col-span-7 lg:row-start-2">
+          {apt.image_scope === "building_and_model_not_assigned_unit" && <div><ToneNotice color={c.ORANGE}>These authorized photos show building amenities or model homes. They do not promise the exact layout, furniture, view, or finishes of the assigned unit.</ToneNotice></div>}
 
           <DetailSection id="stay-highlights" eyebrow="At a glance" title="Stay highlights" description="The essentials guests usually need before deciding whether a home fits their stay." c={c}>
             <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-3">
@@ -385,49 +437,6 @@ export default function ApartmentDetailPage() {
           </DetailSection>}
         </div>
 
-        <aside className="lg:col-span-5 lg:self-stretch"><div className="rounded-[20px] border p-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:p-7" style={{ background: c.CARD, borderColor: c.BORDER, boxShadow: isDarkMode ? "none" : "0 8px 30px rgba(0,0,0,0.08)" }}>
-          {apt.listing_status === "draft" && <div className="mb-4"><ToneNotice color={c.ORANGE} testId="listing-verification-notice">Exact units, short-stay authorization, and final rates are still being verified. You can submit a no-charge availability request for the team to review.</ToneNotice></div>}
-          <p className="text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color: c.BLUE }}>Plan your stay</p>
-          <div className="mt-3 flex flex-wrap items-baseline gap-3"><strong className="text-[30px] font-extrabold">${Math.round(apt.nightly_rate)}<span className="text-[13px] font-medium" style={{ color: c.MUTED }}> / night</span></strong><span className="text-[13px] font-bold" style={{ color: c.BLUE }}>${apt.monthly_rate.toLocaleString()} / month</span></div><p className="mt-1.5 text-[11px] leading-relaxed" style={{ color: c.MUTED }}>Monthly rate is prorated for 30+ nights. Taxes and cleaning appear before request.</p>
-          <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 border-y py-4 text-[12px]" style={{ borderColor: c.BORDER, color: c.MUTED }}><span className="flex items-center gap-1.5"><BedDouble size={16} /> {apt.bedrooms === 0 ? "Studio" : `${apt.bedrooms} bedroom${apt.bedrooms === 1 ? "" : "s"}`}</span><span className="flex items-center gap-1.5"><Bath size={16} /> {apt.bathrooms ? `${apt.bathrooms} baths` : "Bath count varies"}</span><span className="flex items-center gap-1.5"><Users size={16} /> {apt.max_guests} guests</span><span className="flex items-center gap-1.5"><Ruler size={16} /> {apt.sqft ? `${apt.sqft.toLocaleString()} sqft` : "Size varies"}</span></div>
-
-          <div className="mt-6 space-y-4" data-testid="booking-panel">
-            {roomTypeOptions.length > 1 && (
-              <div>
-                <label className="label-eh">Room type</label>
-                <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${roomTypeOptions.length}, minmax(0, 1fr))` }} role="radiogroup" aria-label="Room type" data-testid="room-type-selector">
-                  {roomTypeOptions.map((option) => {
-                    const selected = option.id === apt.id;
-                    return (
-                      <button
-                        key={option.id}
-                        type="button"
-                        role="radio"
-                        aria-checked={selected}
-                        onClick={() => { if (!selected) navigate(`/apartments/${option.id}${queryString ? `?${queryString}` : ""}`, { replace: true }); }}
-                        className="min-h-11 rounded-xl border px-3 py-2 text-[13px] font-bold"
-                        style={{ borderColor: selected ? c.BLUE : c.BORDER, background: selected ? `${c.BLUE}12` : "transparent", color: selected ? c.BLUE : c.TEXT }}
-                        data-testid={`room-type-option-${option.bedrooms}`}
-                      >
-                        {option.bedrooms === 0 ? "Studio" : `${option.bedrooms} bedroom${option.bedrooms === 1 ? "" : "s"}`}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-            <div className="grid grid-cols-2 gap-3"><div><label className="label-eh">Check-in</label><input type="date" min={today} className="input-eh" value={checkIn} onChange={(event) => setCheckIn(event.target.value)} data-testid="booking-checkin" /></div><div><label className="label-eh">Check-out</label><input type="date" min={checkIn || today} className="input-eh" value={checkOut} onChange={(event) => setCheckOut(event.target.value)} data-testid="booking-checkout" /></div></div>
-            {conflict && <ToneNotice color={c.RED} testId="dates-conflict-warning">Those dates overlap an existing stay ({conflict.check_in} → {conflict.check_out}). Please choose different dates.</ToneNotice>}
-            {unavailable.length > 0 && <p className="text-[11px]" style={{ color: c.MUTED }} data-testid="unavailable-list"><strong>Already booked: </strong>{unavailable.map((item, index) => <span key={`${item.check_in}-${item.check_out}`}>{item.check_in} → {item.check_out}{index < unavailable.length - 1 ? " · " : ""}</span>)}</p>}
-            <div className="grid grid-cols-2 gap-3"><div><label className="label-eh">Guests</label><select className="input-eh" value={guests} onChange={(event) => setGuests(event.target.value)} data-testid="booking-guests">{[...Array(apt.max_guests)].map((_, index) => <option key={index + 1} value={index + 1}>{index + 1} {index === 0 ? "guest" : "guests"}</option>)}</select></div><div><label className="label-eh">Purpose</label><select className="input-eh" value={purpose} onChange={(event) => setPurpose(event.target.value)} data-testid="booking-purpose">{PURPOSES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></div></div>
-            <div><label className="label-eh">Notes <span style={{ color: c.MUTED }}>(optional)</span></label><textarea className="input-eh" rows={2} placeholder="Anything we should know?" value={notes} onChange={(event) => setNotes(event.target.value)} data-testid="booking-notes" /></div>
-            <label className="flex min-h-11 cursor-pointer items-start gap-3 text-[13px]" style={{ color: c.TEXT }}><input type="checkbox" className="mt-1" checked={parkingRequested} onChange={(event) => setParkingRequested(event.target.checked)} style={{ accentColor: c.BLUE }} /><span>Request parking <span className="block text-[11px]" style={{ color: c.MUTED }}>${(apt.parking_monthly || 0).toLocaleString()}/month. Short-stay parking is confirmed separately.</span></span></label>
-            {quoteLoading && <p className="text-[11px]" style={{ color: c.MUTED }}>Calculating taxes and fees…</p>}
-            {quote && <div className="space-y-2 rounded-xl p-4 text-[13px]" style={{ background: c.CARD2 }} data-testid="price-breakdown"><div className="flex justify-between" style={{ color: c.MUTED }}><span>{nights} nights {quote.rate_mode === "monthly_prorated" && "(monthly rate)"}</span><span>${quote.accommodation.toLocaleString()}</span></div><div className="flex justify-between" style={{ color: c.MUTED }}><span>Cleaning</span><span>${quote.cleaning_fee.toLocaleString()}</span></div>{quote.parking_fee > 0 && <div className="flex justify-between" style={{ color: c.MUTED }}><span>Parking</span><span>${quote.parking_fee.toLocaleString()}</span></div>}<div className="flex justify-between" style={{ color: c.MUTED }}><span>Philadelphia lodging taxes {quote.tax_rate > 0 ? `(${(quote.tax_rate * 100).toFixed(1)}%)` : "(not applied)"}</span><span>${quote.taxes.toLocaleString()}</span></div><div className="flex justify-between border-t pt-2 font-bold" style={{ borderColor: c.BORDER, color: c.TEXT }}><span>Estimated total</span><span>${quote.total.toLocaleString()}</span></div>{apt.pricing_status === "provisional" && <p className="pt-1 text-[10px]" style={{ color: c.ORANGE }}>Provisional pricing—final approval required before payment.</p>}</div>}
-            <button type="button" className="btn-eh w-full" onClick={requestBooking} disabled={submitting || !!conflict} data-testid="request-booking-btn">{submitting ? "Sending…" : conflict ? "Dates unavailable" : apt.accepting_reservations ? "Request to book" : "Request availability"}</button>
-            <p className="text-center text-[11px]" style={{ color: c.MUTED }}>No charge yet. Payment and access are separate verified steps.</p>
-          </div>
-        </div></aside>
       </div>
       </div>
     </div>
