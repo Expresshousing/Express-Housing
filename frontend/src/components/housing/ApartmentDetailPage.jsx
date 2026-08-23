@@ -257,7 +257,7 @@ export default function ApartmentDetailPage() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
     >
-      <ApartmentGallery images={apt.images} index={mainImg} onIndexChange={setMainImg} open={galleryOpen} onOpenChange={setGalleryOpen} title={apt.title} photoTour={apt.photo_tour} />
+      <ApartmentGallery images={apt.images} index={mainImg} onIndexChange={setMainImg} open={galleryOpen} onOpenChange={setGalleryOpen} title={apt.title} />
       <div className="relative left-1/2 h-[58svh] max-h-[780px] min-h-[430px] w-[100dvw] max-w-none -translate-x-1/2 overflow-hidden sm:h-[70svh] sm:min-h-[520px]" style={{ background: "#0A0A0A" }}>
         {apt.images?.length ? (
           <motion.button
@@ -270,7 +270,7 @@ export default function ApartmentDetailPage() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
           >
-            <img src={apt.images[mainImg]} alt={`${apt.title}${apt.photo_tour?.[mainImg]?.room ? `, ${apt.photo_tour[mainImg].room}` : ""}`} className="h-full w-full object-cover" />
+            <img src={apt.images[mainImg]} alt={`${apt.title} apartment photo`} className="h-full w-full object-cover" />
           </motion.button>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-10 text-center">
@@ -286,6 +286,20 @@ export default function ApartmentDetailPage() {
           <button type="button" onClick={async () => { if (!user) { toast.info("Sign in to save apartments"); navigate("/login"); return; } const result = await toggleWishlist(apt.id); if (result?.saved) toast.success("Saved to your list"); }} className="flex h-11 w-11 items-center justify-center rounded-full border" style={{ borderColor: "rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)", color: saved ? c.BLUE : "#FFFFFF" }} aria-label="Save" data-testid="detail-wishlist-btn"><Heart size={19} fill={saved ? c.BLUE : "none"} /></button>
         </div>
 
+        {apt.images?.length > 1 && (
+          <button
+            type="button"
+            onClick={() => openGallery(mainImg)}
+            className="absolute right-4 top-[76px] flex min-h-11 items-center gap-2 rounded-full bg-white px-4 text-[12px] font-bold text-[#111111] shadow-[0_6px_24px_rgba(0,0,0,0.22)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black md:right-6 md:top-[84px] md:text-[13px]"
+            aria-label={`View all ${apt.images.length} apartment photos`}
+            data-testid="view-all-media-btn"
+          >
+            <ImageIcon size={17} aria-hidden="true" />
+            <span>View all media</span>
+            <span className="border-l border-black/15 pl-2 tabular-nums" aria-hidden="true">{apt.images.length}</span>
+          </button>
+        )}
+
         <div className="eh-container pointer-events-none absolute inset-x-0 bottom-0 pb-10 md:pb-14">
           <p className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.18em] text-white/80"><MapPin size={15} /> {apt.neighborhood} · {apt.building_name}</p>
           <h1 className="mt-5 max-w-4xl text-[46px] font-extrabold leading-[0.94] text-white sm:text-[60px] md:text-[76px]">{apt.title}</h1>
@@ -300,7 +314,7 @@ export default function ApartmentDetailPage() {
       <div className="eh-container pb-20 pt-6 md:pt-8">
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-x-16 lg:gap-y-0">
         <div className="hidden sm:block lg:col-span-7 lg:row-start-1">
-          {apt.images?.length > 0 && <div className="hidden grid-cols-2 gap-3 sm:grid sm:grid-cols-4">{apt.images.map((image, index) => <button type="button" key={`${image}-${index}`} onClick={() => openGallery(index)} className="group relative aspect-[4/3] cursor-zoom-in overflow-hidden rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" style={{ border: `1px solid ${index === mainImg ? c.BLUE : c.BORDER}`, opacity: index === mainImg ? 1 : 0.78, "--tw-ring-color": c.BLUE }} aria-label={`Open photo ${index + 1} of ${apt.images.length} in gallery`}><img src={image} alt={`${apt.title}${apt.photo_tour?.[index]?.room ? `, ${apt.photo_tour[index].room}` : ""}`} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" /></button>)}</div>}
+          {apt.images?.length > 0 && <div className="hidden grid-cols-2 gap-3 sm:grid sm:grid-cols-4">{apt.images.map((image, index) => <button type="button" key={`${image}-${index}`} onClick={() => openGallery(index)} className="group relative aspect-[4/3] cursor-zoom-in overflow-hidden rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" style={{ border: `1px solid ${index === mainImg ? c.BLUE : c.BORDER}`, opacity: index === mainImg ? 1 : 0.78, "--tw-ring-color": c.BLUE }} aria-label={`Open photo ${index + 1} of ${apt.images.length} in gallery`}><img src={image} alt={`${apt.title} apartment photo ${index + 1}`} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" /></button>)}</div>}
         </div>
 
         <aside className="lg:col-span-5 lg:col-start-8 lg:row-span-2 lg:row-start-1 lg:self-stretch"><div className="rounded-[20px] border p-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:p-7" style={{ background: c.CARD, borderColor: c.BORDER, boxShadow: isDarkMode ? "none" : "0 8px 30px rgba(0,0,0,0.08)" }}>
