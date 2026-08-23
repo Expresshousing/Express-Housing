@@ -35,7 +35,7 @@ import { apiErrorMessage } from "@/lib/apiError";
 import { todayISO } from "@/lib/date";
 import { useAuth } from "@/App";
 import { useTheme } from "@/context/ThemeContext";
-import { cardStyle, iconTileStyle, microBadgeStyle, pageStyle } from "@/lib/designSystem";
+import { cardStyle, iconTileStyle, pageStyle } from "@/lib/designSystem";
 import ApartmentGallery from "@/components/housing/apartmentGallery";
 
 const PURPOSES = [{ value: "business", label: "Business travel" }, { value: "medical", label: "Medical stay" }, { value: "family", label: "Family visit" }, { value: "relocation", label: "Relocation" }, { value: "leisure", label: "Leisure" }];
@@ -286,8 +286,6 @@ export default function ApartmentDetailPage() {
           <button type="button" onClick={async () => { if (!user) { toast.info("Sign in to save apartments"); navigate("/login"); return; } const result = await toggleWishlist(apt.id); if (result?.saved) toast.success("Saved to your list"); }} className="flex h-11 w-11 items-center justify-center rounded-full border" style={{ borderColor: "rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)", color: saved ? c.BLUE : "#FFFFFF" }} aria-label="Save" data-testid="detail-wishlist-btn"><Heart size={19} fill={saved ? c.BLUE : "none"} /></button>
         </div>
 
-        {apt.photo_tour?.[mainImg]?.room && <span className="absolute left-4 top-[64px] md:left-6" style={{ ...microBadgeStyle("#FFFFFF"), background: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.3)", backdropFilter: "blur(8px)" }} data-testid="photo-room-label">{apt.photo_tour[mainImg].room}</span>}
-
         <div className="eh-container pointer-events-none absolute inset-x-0 bottom-0 pb-10 md:pb-14">
           <p className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.18em] text-white/80"><MapPin size={15} /> {apt.neighborhood} · {apt.building_name}</p>
           <h1 className="mt-5 max-w-4xl text-[46px] font-extrabold leading-[0.94] text-white sm:text-[60px] md:text-[76px]">{apt.title}</h1>
@@ -310,7 +308,6 @@ export default function ApartmentDetailPage() {
             <p className="text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color: c.BLUE }}>Ready when you are</p>
             <button type="button" className="btn-eh mt-3 flex min-h-14 w-full items-center justify-center gap-2 text-[16px]" onClick={() => bookingStartRef.current?.focus()} data-testid="mobile-book-apartment-cta">Book apartment <ArrowRight size={18} /></button>
           </div>
-          {apt.listing_status === "draft" && <div className="mb-4"><ToneNotice color={c.ORANGE} testId="listing-verification-notice">Exact units, short-stay authorization, and final rates are still being verified. You can submit a no-charge availability request for the team to review.</ToneNotice></div>}
           <p className="text-[11px] font-bold uppercase tracking-[0.22em]" style={{ color: c.BLUE }}>Plan your stay</p>
           <div className="mt-3 flex flex-wrap items-baseline gap-3"><strong className="text-[30px] font-extrabold">${Math.round(apt.nightly_rate)}<span className="text-[13px] font-medium" style={{ color: c.MUTED }}> / night</span></strong><span className="text-[13px] font-bold" style={{ color: c.BLUE }}>${apt.monthly_rate.toLocaleString()} / month</span></div><p className="mt-1.5 text-[11px] leading-relaxed" style={{ color: c.MUTED }}>Monthly rate is prorated for 30+ nights. Taxes and cleaning appear before request.</p>
           <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 border-y py-4 text-[12px]" style={{ borderColor: c.BORDER, color: c.MUTED }}><span className="flex items-center gap-1.5"><BedDouble size={16} /> {apt.bedrooms === 0 ? "Studio" : `${apt.bedrooms} bedroom${apt.bedrooms === 1 ? "" : "s"}`}</span><span className="flex items-center gap-1.5"><Bath size={16} /> {apt.bathrooms ? `${apt.bathrooms} baths` : "Bath count varies"}</span><span className="flex items-center gap-1.5"><Users size={16} /> {apt.max_guests} guests</span><span className="flex items-center gap-1.5"><Ruler size={16} /> {apt.sqft ? `${apt.sqft.toLocaleString()} sqft` : "Size varies"}</span></div>
@@ -354,8 +351,6 @@ export default function ApartmentDetailPage() {
         </div></aside>
 
         <div className="lg:col-span-7 lg:row-start-2">
-          {apt.image_scope === "building_and_model_not_assigned_unit" && <div><ToneNotice color={c.ORANGE}>These authorized photos show building amenities or model homes. They do not promise the exact layout, furniture, view, or finishes of the assigned unit.</ToneNotice></div>}
-
           <DetailSection id="stay-highlights" eyebrow="At a glance" title="Stay highlights" description="The essentials guests usually need before deciding whether a home fits their stay." c={c}>
             <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-3">
               {stayHighlights.map((item) => <FeatureCard key={item.title} {...item} color={c.BLUE} c={c} isDarkMode={isDarkMode} />)}
