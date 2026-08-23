@@ -250,7 +250,13 @@ export default function ApartmentDetailPage() {
   };
 
   return (
-    <div style={pageStyle(c)} data-testid="apartment-detail">
+    <motion.div
+      style={pageStyle(c)}
+      data-testid="apartment-detail"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+    >
       <ApartmentGallery images={apt.images} index={mainImg} onIndexChange={setMainImg} open={galleryOpen} onOpenChange={setGalleryOpen} title={apt.title} photoTour={apt.photo_tour} />
       <div className="relative left-1/2 h-[58svh] max-h-[780px] min-h-[430px] w-[100dvw] max-w-none -translate-x-1/2 overflow-hidden sm:h-[70svh] sm:min-h-[520px]" style={{ background: "#0A0A0A" }}>
         {apt.images?.length ? (
@@ -439,6 +445,6 @@ export default function ApartmentDetailPage() {
 
       </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
