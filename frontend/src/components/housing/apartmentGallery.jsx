@@ -3,7 +3,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { adjacentImageIndex, swipeDirection } from "./apartmentGalleryUtils";
 
-export default function ApartmentGallery({ images = [], index, onIndexChange, open, onOpenChange, title, photoTour = [] }) {
+export default function ApartmentGallery({ images = [], index, onIndexChange, open, onOpenChange, title }) {
   const swipeStart = useRef(null);
   const closeButtonRef = useRef(null);
   const imageCount = images.length;
@@ -24,8 +24,7 @@ export default function ApartmentGallery({ images = [], index, onIndexChange, op
 
   if (!imageCount) return null;
 
-  const room = photoTour?.[index]?.room;
-  const imageAlt = `${title}${room ? `, ${room}` : ""} — photo ${index + 1} of ${imageCount}`;
+  const imageAlt = `${title} — photo ${index + 1} of ${imageCount}`;
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -44,7 +43,6 @@ export default function ApartmentGallery({ images = [], index, onIndexChange, op
           >
             <div>
               <p className="max-w-[65vw] truncate text-sm font-semibold sm:text-base">{title}</p>
-              {room && <p className="mt-0.5 text-[11px] uppercase tracking-[0.18em] text-white/55">{room}</p>}
             </div>
             <div className="flex items-center gap-3">
               <span className="min-w-12 text-center text-sm tabular-nums text-white/70" aria-live="polite">{index + 1} / {imageCount}</span>
