@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { BrowserRouter, Navigate, Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import { Toaster } from "sonner";
 import api from "@/lib/api";
 import Header from "@/components/housing/Header";
@@ -98,6 +99,38 @@ const AuthRedirect = ({ mode }) => {
   return <Navigate replace to="/" state={{ authMode: mode, from: location.state?.from }} />;
 };
 
+const AnimatedRoutes = () => {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.18, ease: "easeInOut" }}
+      >
+        <Routes location={location}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/apartments" element={<ApartmentsRedirect />} />
+          <Route path="/apartments/:id" element={<ApartmentDetailPage />} />
+          <Route path="/login" element={<AuthRedirect mode="login" />} />
+          <Route path="/signup" element={<AuthRedirect mode="signup" />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/partner" element={<PartnerDashboard />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/faq" element={<FaqPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/testimonials" element={<TestimonialsPage />} />
+          <Route path="/locations" element={<LocationsPage />} />
+          <Route path="/careers" element={<CareersPage />} />
+        </Routes>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
 function App() {
   const { colors: c, isDarkMode } = useTheme();
   return (
@@ -107,22 +140,7 @@ function App() {
         <div className="min-h-screen flex flex-col transition-colors" style={{ background: c.BG, color: c.TEXT, fontFamily: c.INTER }}>
           <Header />
           <main className="flex-1">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/apartments" element={<ApartmentsRedirect />} />
-              <Route path="/apartments/:id" element={<ApartmentDetailPage />} />
-              <Route path="/login" element={<AuthRedirect mode="login" />} />
-              <Route path="/signup" element={<AuthRedirect mode="signup" />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/admin" element={<AdminPage />} />
-              <Route path="/partner" element={<PartnerDashboard />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/faq" element={<FaqPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/testimonials" element={<TestimonialsPage />} />
-              <Route path="/locations" element={<LocationsPage />} />
-              <Route path="/careers" element={<CareersPage />} />
-            </Routes>
+            <AnimatedRoutes />
           </main>
           <Footer />
         </div>
