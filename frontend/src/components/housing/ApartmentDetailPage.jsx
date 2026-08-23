@@ -290,12 +290,11 @@ export default function ApartmentDetailPage() {
           <button
             type="button"
             onClick={() => openGallery(mainImg)}
-            className="absolute bottom-4 right-4 flex min-h-11 items-center gap-1.5 rounded-full bg-white px-3 text-[11px] font-bold text-[#111111] shadow-[0_6px_24px_rgba(0,0,0,0.22)] transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black md:bottom-6 md:right-6 md:text-[12px]"
+            className="btn-eh absolute bottom-4 right-4 z-10 !min-h-11 !rounded-xl !px-5 !py-3 !text-[13px] shadow-[0_8px_24px_rgba(0,0,0,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black md:bottom-6 md:right-6"
             aria-label={`View all ${apt.images.length} apartment photos`}
             data-testid="view-all-media-btn"
           >
-            <ImageIcon size={14} aria-hidden="true" />
-            <span>View all media</span>
+            View all
           </button>
         )}
 
