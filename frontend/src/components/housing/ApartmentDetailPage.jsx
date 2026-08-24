@@ -15,7 +15,6 @@ import {
   Clock3,
   CookingPot,
   DoorOpen,
-  ExternalLink,
   Headphones,
   Heart,
   Image as ImageIcon,
@@ -383,7 +382,7 @@ export default function ApartmentDetailPage() {
             </div>
           </DetailSection>
 
-          <DetailSection id="building-amenities" eyebrow="Official source" title="Verified building amenities" description={`${apt.amenities?.length || 0} amenities published by ${apt.building_name}. Availability and operating hours can change, so the building remains the source of truth.`} c={c}>
+          <DetailSection id="building-amenities" eyebrow="Building features" title="Amenities at a glance" description={`${apt.amenities?.length || 0} amenities currently listed for ${apt.building_name}. Availability and operating hours may change.`} c={c}>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {apt.amenities?.map((amenity) => (
                 <div key={amenity} className="flex min-h-14 items-center gap-3 rounded-[14px] p-3" style={{ background: c.CARD, border: `1px solid ${c.BORDER}` }}>
@@ -391,10 +390,6 @@ export default function ApartmentDetailPage() {
                   <span className="text-[13px] font-semibold leading-snug" style={{ color: c.TEXT }}>{amenity}</span>
                 </div>
               ))}
-            </div>
-            <div className="mt-4 flex flex-wrap gap-3">
-              {apt.amenities_source && <a href={apt.amenities_source} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 text-[13px] font-semibold" style={{ color: c.BLUE }}>View official amenity source <ExternalLink size={15} /></a>}
-              {apt.official_website && <a href={apt.official_website} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 text-[13px] font-semibold" style={{ color: c.TEXT }}>Visit building website <ExternalLink size={15} /></a>}
             </div>
           </DetailSection>
 
@@ -407,12 +402,11 @@ export default function ApartmentDetailPage() {
                   <p className="mt-2 text-[13px] leading-relaxed" style={{ color: c.MUTED }}>{buildingContext}</p>
                 </div>
               </div>
-              <div className="flex flex-col gap-3 border-t p-4 sm:flex-row sm:items-center sm:justify-between" style={{ borderColor: c.BORDER }}>
+              <div className="border-t p-4" style={{ borderColor: c.BORDER }}>
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: c.MUTED }}>Public building address</p>
                   <p className="mt-1 text-[13px] font-bold" style={{ color: c.TEXT }}>{apt.address} · Philadelphia, PA</p>
                 </div>
-                {apt.official_website && <a href={apt.official_website} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 text-[13px] font-semibold" style={{ color: c.BLUE }}>Explore the building <ArrowRight size={15} /></a>}
               </div>
             </div>
           </DetailSection>

@@ -78,7 +78,7 @@ const FAQ_CATEGORIES = [
       },
       {
         question: "Which amenities are included?",
-        answer: "Amenities vary by building. Each apartment page lists verified building amenities and links to the official source so you can review what is available before booking.",
+        answer: "Amenities vary by building. Each apartment page lists the building amenities currently available for review before booking.",
       },
       {
         question: "Do I need an account?",
