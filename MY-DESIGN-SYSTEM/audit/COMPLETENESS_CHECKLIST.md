@@ -1,0 +1,22 @@
+# Completeness Checklist
+
+- [x] Philosophy and creative direction
+- [x] Typography family, scale, weights, display behavior, and input-size rule
+- [x] Light/dark, editorial, brand, status, and muted color values
+- [x] Spacing, container, grid, and section rhythm
+- [x] Radius and elevation systems
+- [x] Breakpoints and mobile transformations
+- [x] Interaction states, focus, touch size, safe areas, and reduced motion
+- [x] Editorial hero, chapters, media, rows, CTA, and footer patterns
+- [x] Buttons, fields, cards, panels, badges, filters, tables, drawers, dialogs, toasts, loading, and empty states
+- [x] Public, detail, guest, admin, and limited-role page patterns
+- [x] Generic framework examples
+- [x] Dependency and license notes
+- [x] Asset provenance/reuse boundaries
+- [x] Security and privacy review
+- [x] Machine-readable token file
+- [x] AI implementation instructions
+- [x] Known inconsistencies and migration guidance
+- [x] Screenshot status and sanitized capture checklist
+- [x] No source app modifications outside this package
+- [x] No source photos, secrets, credentials, customer records, build output, dependency folders, or Git data
