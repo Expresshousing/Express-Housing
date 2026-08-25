@@ -81,10 +81,21 @@ const AuthProvider = ({ children }) => {
   );
 };
 
+if (typeof window !== "undefined" && "scrollRestoration" in window.history) {
+  // Left on "auto", Safari's own scroll-restoration/momentum-scroll can race the reset
+  // below and win, leaving the new page scrolled to wherever the previous page was.
+  window.history.scrollRestoration = "manual";
+}
+
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
     window.scrollTo(0, 0);
+    // A trailing momentum scroll (e.g. tapping a card mid-swipe on iOS) can still land
+    // after this fires, so re-assert on the next frame and shortly after as a backstop.
+    const raf = requestAnimationFrame(() => window.scrollTo(0, 0));
+    const timeout = setTimeout(() => window.scrollTo(0, 0), 150);
+    return () => { cancelAnimationFrame(raf); clearTimeout(timeout); };
   }, [pathname]);
   return null;
 };

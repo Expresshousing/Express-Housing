@@ -108,6 +108,74 @@ function ThingsCard({ icon: Icon, title, description, items, c, isDarkMode }) {
   );
 }
 
+function formatDateDisplay(iso) {
+  if (!iso) return "";
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+const toISO = (y, m, d) => `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+
+function DateField({ value, onChange, min, c, testId }) {
+  const [open, setOpen] = useState(false);
+  const [viewDate, setViewDate] = useState(() => { const [y, m] = (value || min).split("-").map(Number); return { y, m: m - 1 }; });
+  const wrapRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (event) => { if (wrapRef.current && !wrapRef.current.contains(event.target)) setOpen(false); };
+    document.addEventListener("mousedown", handler);
+    document.addEventListener("touchstart", handler);
+    return () => { document.removeEventListener("mousedown", handler); document.removeEventListener("touchstart", handler); };
+  }, [open]);
+
+  const openPicker = () => {
+    const [y, m] = (value || min).split("-").map(Number);
+    setViewDate({ y, m: m - 1 });
+    setOpen(true);
+  };
+
+  const daysInMonth = new Date(viewDate.y, viewDate.m + 1, 0).getDate();
+  const startWeekday = new Date(viewDate.y, viewDate.m, 1).getDay();
+  const monthLabel = new Date(viewDate.y, viewDate.m, 1).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  const cells = [...Array(startWeekday).fill(null), ...Array(daysInMonth)].map((_, index) => (index < startWeekday ? null : index - startWeekday + 1));
+  const minValue = min.replaceAll("-", "");
+
+  return (
+    <div className="relative min-w-0" ref={wrapRef}>
+      <button type="button" className="input-eh flex w-full items-center justify-between text-left" onClick={openPicker} data-testid={testId}>
+        <span style={{ color: value ? c.TEXT : c.MUTED }}>{value ? formatDateDisplay(value) : "mm/dd/yyyy"}</span>
+        <CalendarDays size={16} color={c.MUTED} className="shrink-0" />
+      </button>
+      {open && (
+        <div className="absolute left-0 right-0 z-20 mt-2 rounded-2xl border p-4 shadow-lg" style={{ background: c.CARD, borderColor: c.BORDER, boxShadow: "0 12px 32px rgba(0,0,0,0.18)" }}>
+          <div className="flex items-center justify-between">
+            <button type="button" onClick={() => setViewDate((v) => (v.m === 0 ? { y: v.y - 1, m: 11 } : { y: v.y, m: v.m - 1 }))} className="flex h-8 w-8 items-center justify-center rounded-full" style={{ color: c.TEXT }} aria-label="Previous month"><ChevronLeft size={16} /></button>
+            <p className="text-[13px] font-bold" style={{ color: c.TEXT }}>{monthLabel}</p>
+            <button type="button" onClick={() => setViewDate((v) => (v.m === 11 ? { y: v.y + 1, m: 0 } : { y: v.y, m: v.m + 1 }))} className="flex h-8 w-8 items-center justify-center rounded-full" style={{ color: c.TEXT }} aria-label="Next month"><ArrowRight size={16} /></button>
+          </div>
+          <div className="mt-3 grid grid-cols-7 gap-1 text-center text-[10px] font-bold" style={{ color: c.MUTED }}>
+            {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => <span key={index}>{day}</span>)}
+          </div>
+          <div className="mt-1 grid grid-cols-7 gap-1">
+            {cells.map((d, index) => {
+              if (d === null) return <span key={index} />;
+              const disabled = `${viewDate.y}${String(viewDate.m + 1).padStart(2, "0")}${String(d).padStart(2, "0")}` < minValue;
+              const iso = toISO(viewDate.y, viewDate.m, d);
+              const selected = value === iso;
+              return (
+                <button key={index} type="button" disabled={disabled} onClick={() => { onChange(iso); setOpen(false); }} className="flex h-9 w-9 items-center justify-center rounded-full text-[13px] font-semibold" style={{ color: disabled ? c.MUTED : selected ? "#FFFFFF" : c.TEXT, background: selected ? c.BLUE : "transparent", opacity: disabled ? 0.4 : 1, cursor: disabled ? "not-allowed" : "pointer" }}>
+                  {d}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ApartmentDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -130,7 +198,6 @@ export default function ApartmentDetailPage() {
   const [quote, setQuote] = useState(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const bookingStartRef = useRef(null);
 
   useEffect(() => {
     setNotFound(false);
@@ -347,17 +414,11 @@ export default function ApartmentDetailPage() {
             <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="min-w-0">
                 <label className="label-eh">Check-in</label>
-                <div className="relative min-w-0">
-                  <input ref={bookingStartRef} type="date" min={today} className="input-eh min-w-0" style={!checkIn ? { color: "transparent", WebkitTextFillColor: "transparent" } : undefined} value={checkIn} onChange={(event) => setCheckIn(event.target.value)} data-testid="booking-checkin" />
-                  {!checkIn && <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[16px] font-medium" style={{ color: c.MUTED }}>mm/dd/yyyy</span>}
-                </div>
+                <DateField value={checkIn} onChange={setCheckIn} min={today} c={c} testId="booking-checkin" />
               </div>
               <div className="min-w-0">
                 <label className="label-eh">Check-out</label>
-                <div className="relative min-w-0">
-                  <input type="date" min={checkIn || today} className="input-eh min-w-0" style={!checkOut ? { color: "transparent", WebkitTextFillColor: "transparent" } : undefined} value={checkOut} onChange={(event) => setCheckOut(event.target.value)} data-testid="booking-checkout" />
-                  {!checkOut && <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[16px] font-medium" style={{ color: c.MUTED }}>mm/dd/yyyy</span>}
-                </div>
+                <DateField value={checkOut} onChange={setCheckOut} min={checkIn || today} c={c} testId="booking-checkout" />
               </div>
             </div>
             {conflict && <ToneNotice color={c.RED} testId="dates-conflict-warning">Those dates overlap an existing stay ({conflict.check_in} → {conflict.check_out}). Please choose different dates.</ToneNotice>}
