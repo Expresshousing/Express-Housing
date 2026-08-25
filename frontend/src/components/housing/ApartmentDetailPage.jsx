@@ -344,18 +344,18 @@ export default function ApartmentDetailPage() {
                 </div>
               </div>
             )}
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div>
+            <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="min-w-0">
                 <label className="label-eh">Check-in</label>
-                <div className="relative">
-                  <input ref={bookingStartRef} type="date" min={today} className="input-eh" style={!checkIn ? { color: "transparent", WebkitTextFillColor: "transparent" } : undefined} value={checkIn} onChange={(event) => setCheckIn(event.target.value)} data-testid="booking-checkin" />
+                <div className="relative min-w-0">
+                  <input ref={bookingStartRef} type="date" min={today} className="input-eh min-w-0" style={!checkIn ? { color: "transparent", WebkitTextFillColor: "transparent" } : undefined} value={checkIn} onChange={(event) => setCheckIn(event.target.value)} data-testid="booking-checkin" />
                   {!checkIn && <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[16px] font-medium" style={{ color: c.MUTED }}>mm/dd/yyyy</span>}
                 </div>
               </div>
-              <div>
+              <div className="min-w-0">
                 <label className="label-eh">Check-out</label>
-                <div className="relative">
-                  <input type="date" min={checkIn || today} className="input-eh" style={!checkOut ? { color: "transparent", WebkitTextFillColor: "transparent" } : undefined} value={checkOut} onChange={(event) => setCheckOut(event.target.value)} data-testid="booking-checkout" />
+                <div className="relative min-w-0">
+                  <input type="date" min={checkIn || today} className="input-eh min-w-0" style={!checkOut ? { color: "transparent", WebkitTextFillColor: "transparent" } : undefined} value={checkOut} onChange={(event) => setCheckOut(event.target.value)} data-testid="booking-checkout" />
                   {!checkOut && <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[16px] font-medium" style={{ color: c.MUTED }}>mm/dd/yyyy</span>}
                 </div>
               </div>
