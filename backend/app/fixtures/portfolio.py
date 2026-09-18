@@ -184,19 +184,84 @@ BUILDING_IMAGES = {
     ],
     "the-hannah": [
         {
-            "url": "/images/operator-portfolio/the-hannah-entrance.jpg",
+            "url": "/images/buildings/the-hannah/model-one-bedroom.jpg",
+            "label": "Official one-bedroom model imagery",
+            "source_url": "https://thehannahcallowhill.com/assets/images/cache/1bedroom-1W1-0228abb712c121d26f4c318d37356a52.jpg",
+        },
+        {
+            "url": "/images/operator-portfolio/the-hannah-exterior-entrance.avif",
             "label": "Operator-supplied official building-entrance imagery",
             "source_url": "https://thehannahcallowhill.com/",
         },
         {
-            "url": "/images/operator-portfolio/clubhouse.jpg",
-            "label": "Operator-supplied official clubhouse imagery",
+            "url": "/images/operator-portfolio/the-hannah-exterior-entrance-street.avif",
+            "label": "Operator-supplied official street-level building-entrance imagery",
             "source_url": "https://thehannahcallowhill.com/",
         },
         {
-            "url": "/images/buildings/the-hannah/model-one-bedroom.jpg",
-            "label": "Official one-bedroom model imagery",
-            "source_url": "https://thehannahcallowhill.com/assets/images/cache/1bedroom-1W1-0228abb712c121d26f4c318d37356a52.jpg",
+            "url": "/images/operator-portfolio/the-hannah-lobby-fireplace-lounge.avif",
+            "label": "Operator-supplied official lobby fireplace-lounge imagery",
+            "source_url": "https://thehannahcallowhill.com/",
+        },
+        {
+            "url": "/images/operator-portfolio/the-hannah-lobby-fireplace-seating.avif",
+            "label": "Operator-supplied official lobby fireplace-seating imagery",
+            "source_url": "https://thehannahcallowhill.com/",
+        },
+        {
+            "url": "/images/operator-portfolio/the-hannah-lobby-window-seating.avif",
+            "label": "Operator-supplied official lobby window-seating imagery",
+            "source_url": "https://thehannahcallowhill.com/",
+        },
+        {
+            "url": "/images/operator-portfolio/the-hannah-resident-lounge-brick.avif",
+            "label": "Operator-supplied official resident-lounge imagery",
+            "source_url": "https://thehannahcallowhill.com/",
+        },
+        {
+            "url": "/images/operator-portfolio/the-hannah-resident-lounge-billiards.avif",
+            "label": "Operator-supplied official resident-lounge billiards imagery",
+            "source_url": "https://thehannahcallowhill.com/",
+        },
+        {
+            "url": "/images/operator-portfolio/the-hannah-community-kitchen-island.avif",
+            "label": "Operator-supplied official community-kitchen imagery",
+            "source_url": "https://thehannahcallowhill.com/",
+        },
+        {
+            "url": "/images/operator-portfolio/the-hannah-community-kitchen-bar.avif",
+            "label": "Operator-supplied official community-kitchen bar imagery",
+            "source_url": "https://thehannahcallowhill.com/",
+        },
+        {
+            "url": "/images/operator-portfolio/the-hannah-community-dining-table.avif",
+            "label": "Operator-supplied official community dining imagery",
+            "source_url": "https://thehannahcallowhill.com/",
+        },
+        {
+            "url": "/images/operator-portfolio/the-hannah-media-room.avif",
+            "label": "Operator-supplied official media-room imagery",
+            "source_url": "https://thehannahcallowhill.com/",
+        },
+        {
+            "url": "/images/operator-portfolio/the-hannah-study-nook.avif",
+            "label": "Operator-supplied official coworking study-nook imagery",
+            "source_url": "https://thehannahcallowhill.com/",
+        },
+        {
+            "url": "/images/operator-portfolio/the-hannah-fitness-center.avif",
+            "label": "Operator-supplied official fitness-center imagery",
+            "source_url": "https://thehannahcallowhill.com/",
+        },
+        {
+            "url": "/images/operator-portfolio/the-hannah-fitness-yoga-studio.avif",
+            "label": "Operator-supplied official yoga-studio imagery",
+            "source_url": "https://thehannahcallowhill.com/",
+        },
+        {
+            "url": "/images/operator-portfolio/the-hannah-courtyard-grilling-terrace.avif",
+            "label": "Operator-supplied official courtyard grilling-terrace imagery",
+            "source_url": "https://thehannahcallowhill.com/",
         },
     ],
     "edgewater-2": [
