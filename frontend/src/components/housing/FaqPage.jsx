@@ -35,10 +35,6 @@ const FAQ_CATEGORIES = [
         answer: "You can review the selected building and home type, dates, guest count, rate, cleaning fee, taxes, parking if requested, cancellation terms, and the total amount due before payment.",
       },
       {
-        question: "What are the current monthly rates?",
-        answer: "The current portfolio starts at $3,000 per month for a one-bedroom and $3,500 per month for a two-bedroom. Your date-specific quote is the final source of truth because taxes, cleaning, parking, and stay length can change the total.",
-      },
-      {
         question: "How much does parking cost?",
         answer: "Monthly parking is $300 when available. Shorter-stay parking, garage access, and vehicle instructions are confirmed separately for the selected building and dates.",
       },

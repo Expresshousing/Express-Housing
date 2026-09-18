@@ -63,7 +63,7 @@ export default function ApartmentCard({ apartment }) {
           <span className="flex items-center gap-1"><Bath size={15} /> {apartment.bathrooms ? `${apartment.bathrooms} ba` : "Bath varies"}</span>
           <span className="flex items-center gap-1"><Users size={15} /> {apartment.max_guests}</span>
         </div>
-        <div className="mt-3 flex items-baseline justify-between gap-3"><p><strong className="text-[17px] font-bold">${Math.round(apartment.nightly_rate)}</strong><span className="text-[13px]" style={{ color: c.MUTED }}> / night</span></p><span className="text-[13px] font-semibold" style={{ color: c.BLUE }}>${apartment.monthly_rate.toLocaleString()} / mo</span></div>
+        <div className="mt-3 flex items-baseline"><p><strong className="text-[17px] font-bold">${Math.round(apartment.nightly_rate)}</strong><span className="text-[13px]" style={{ color: c.MUTED }}> / night</span></p></div>
         {apartment.inventory_count > 1 && <p className="mt-2 text-[11px]" style={{ color: c.MUTED }}>{apartment.inventory_count} homes in this inventory type</p>}
         {apartment.image_scope === "building_and_model_not_assigned_unit" && <p className="mt-2 text-[11px]" style={{ color: c.ORANGE }}>Building/model imagery—not the assigned unit.</p>}
       </div>
