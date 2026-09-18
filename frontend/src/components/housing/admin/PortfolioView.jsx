@@ -48,6 +48,9 @@ function ListingReadinessRow({ listing, units, onSaved }) {
   const [photoStatus, setPhotoStatus] = useState(listing.photo_status);
   const [complianceStatus, setComplianceStatus] = useState(listing.compliance_status);
   const [listingStatus, setListingStatus] = useState(listing.listing_status);
+  const [images, setImages] = useState((listing.images || []).join("\n"));
+  const [editingImages, setEditingImages] = useState(false);
+  const [savingImages, setSavingImages] = useState(false);
   const [saving, setSaving] = useState(false);
   const [toggling, setToggling] = useState(false);
 
@@ -69,6 +72,25 @@ function ListingReadinessRow({ listing, units, onSaved }) {
       toast.error(apiErrorMessage(error, "Could not update listing readiness"));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const saveImages = async () => {
+    const urls = images.split("\n").map((line) => line.trim()).filter(Boolean);
+    if (!urls.length) {
+      toast.error("Add at least one photo path");
+      return;
+    }
+    setSavingImages(true);
+    try {
+      await api.patch(`/admin/listings/${listing.id}`, { images: urls });
+      toast.success(`${listing.title}: ${urls.length} photos saved`);
+      setEditingImages(false);
+      onSaved();
+    } catch (error) {
+      toast.error(apiErrorMessage(error, "Could not update photos"));
+    } finally {
+      setSavingImages(false);
     }
   };
 
@@ -112,6 +134,21 @@ function ListingReadinessRow({ listing, units, onSaved }) {
         <label><span className="label-eh">Listing status</span><select className="input-eh !py-2" value={listingStatus} onChange={(e) => setListingStatus(e.target.value)}><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
       </div>
       <button type="button" className="mt-3" style={secondaryButtonStyle(c)} onClick={saveReadiness} disabled={saving} data-testid={`save-readiness-${listing.id}`}>{saving ? "Saving" : "Save readiness"}</button>
+      <div className="mt-4 border-t pt-4" style={{ borderColor: c.BORDER }}>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <p className="text-[13px] font-bold">Listing photos</p>
+            <p className="mt-1 text-[11px]" style={{ color: c.MUTED }}>{(listing.images || []).length} in the gallery · shown in this order, first one leads</p>
+          </div>
+          <button type="button" style={secondaryButtonStyle(c)} onClick={() => { setImages((listing.images || []).join("\n")); setEditingImages((open) => !open); }} data-testid={`toggle-photos-${listing.id}`}>{editingImages ? "Cancel" : "Edit photos"}</button>
+        </div>
+        {editingImages && <div className="mt-3">
+          <label className="label-eh" htmlFor={`images-${listing.id}`}>One photo path per line</label>
+          <textarea id={`images-${listing.id}`} className="input-eh" rows={10} value={images} onChange={(e) => setImages(e.target.value)} spellCheck={false} style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: 12 }} data-testid={`images-input-${listing.id}`} />
+          <p className="mt-2 text-[11px] leading-relaxed" style={{ color: c.MUTED }}>Paths are served by the site, for example <code>/images/buildings/the-hannah/model-one-bedroom.jpg</code>. Saving replaces the whole gallery, so a listing whose photography is already verified keeps that status.</p>
+          <button type="button" className="mt-3" style={primaryButtonStyle(c)} onClick={saveImages} disabled={savingImages} data-testid={`save-photos-${listing.id}`}>{savingImages ? "Saving photos…" : `Save ${images.split("\n").filter((line) => line.trim()).length} photos`}</button>
+        </div>}
+      </div>
     </div>
   );
 }
