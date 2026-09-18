@@ -21,7 +21,7 @@ from jwt.exceptions import InvalidTokenError
 from cryptography.fernet import Fernet, InvalidToken
 
 from backend.app.fixtures.portfolio import INTEGRATION_SETUP, PORTFOLIO_VERSION, build_portfolio
-from backend.app.services.pricing import calculate_quote
+from backend.app.services.pricing import NIGHTLY_RATES, calculate_quote, update_apartment_nightly_rates
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -1338,7 +1338,7 @@ SEED_APARTMENTS = [
     {
         "title": "The Franklin Residences 1BR", "building_name": "The Franklin", "neighborhood": "Old City",
         "address": "834 Chestnut St", "apt_type": "1 Bedroom", "bedrooms": 1, "bathrooms": 1, "max_guests": 2, "sqft": 720,
-        "nightly_rate": 159, "monthly_rate": 3400,
+        "nightly_rate": NIGHTLY_RATES[1], "monthly_rate": 3400,
         "description": "A polished one-bedroom in the heart of Old City, steps from Independence Hall. Dedicated workspace, gigabit Wi-Fi, and a building gym make this a favorite for business travelers who want history outside their door.",
         "amenities": AMEN_CORE + ["Dedicated workspace", "24-hour fitness center", "Elevator"],
         "images": [LR[0], BR[0], KT[0], LR[3]], "stay_paths": ["corporate"], "rating": 4.9, "review_count": 42,
@@ -1351,7 +1351,7 @@ SEED_APARTMENTS = [
     {
         "title": "Rittenhouse Square Luxe 2BR", "building_name": "The Rittenhouse Collection", "neighborhood": "Rittenhouse Square",
         "address": "1900 Walnut St", "apt_type": "2 Bedroom", "bedrooms": 2, "bathrooms": 2, "max_guests": 4, "sqft": 1100,
-        "nightly_rate": 249, "monthly_rate": 5200,
+        "nightly_rate": NIGHTLY_RATES[2], "monthly_rate": 5200,
         "description": "Designer two-bedroom overlooking Rittenhouse Square with a chef's kitchen, marble baths, and a resident lounge. Ideal for relocations and executive stays that need room to breathe.",
         "amenities": AMEN_CORE + ["Doorman", "24-hour fitness center", "Rooftop terrace", "Dedicated workspace"],
         "images": [LR[3], BR[1], KT[1], LR[1]], "stay_paths": ["corporate", "family"], "rating": 4.9, "review_count": 57,
@@ -1374,7 +1374,7 @@ SEED_APARTMENTS = [
     {
         "title": "Fishtown Artist Loft 1BR", "building_name": "The Frankford Lofts", "neighborhood": "Fishtown",
         "address": "1401 Frankford Ave", "apt_type": "1 Bedroom", "bedrooms": 1, "bathrooms": 1, "max_guests": 3, "sqft": 850,
-        "nightly_rate": 139, "monthly_rate": 2900,
+        "nightly_rate": NIGHTLY_RATES[1], "monthly_rate": 2900,
         "description": "Exposed brick, 14-foot ceilings, and Fishtown's best coffee downstairs. A creative loft minutes from the El, made for longer stays that should not feel corporate.",
         "amenities": AMEN_CORE + ["Pet friendly", "Rooftop terrace"],
         "images": [LR[2], BR[3], KT[3], LR[6]], "stay_paths": ["family"], "rating": 4.8, "review_count": 26,
@@ -1384,7 +1384,7 @@ SEED_APARTMENTS = [
     {
         "title": "University City Med Stay 1BR", "building_name": "The Radian", "neighborhood": "University City",
         "address": "3925 Walnut St", "apt_type": "1 Bedroom", "bedrooms": 1, "bathrooms": 1, "max_guests": 2, "sqft": 680,
-        "nightly_rate": 129, "monthly_rate": 2750,
+        "nightly_rate": NIGHTLY_RATES[1], "monthly_rate": 2750,
         "description": "Five minutes from Penn Medicine and CHOP. Comfortable, quiet one-bedroom built for medical travelers, visiting clinicians, and families who need to be close to care.",
         "amenities": AMEN_CORE + ["Free parking", "Elevator", "24/7 guest support"],
         "images": [LR[4], BR[0], KT[0]], "stay_paths": ["medical"], "rating": 4.9, "review_count": 48,
@@ -1407,7 +1407,7 @@ SEED_APARTMENTS = [
     {
         "title": "Society Hill Classic 2BR", "building_name": "Society Hill Towers", "neighborhood": "Society Hill",
         "address": "200 Locust St", "apt_type": "2 Bedroom", "bedrooms": 2, "bathrooms": 1, "max_guests": 4, "sqft": 980,
-        "nightly_rate": 199, "monthly_rate": 4300,
+        "nightly_rate": NIGHTLY_RATES[2], "monthly_rate": 4300,
         "description": "Cobblestone streets and river views. A classic two-bedroom in one of Philadelphia's most storied neighborhoods, refreshed with modern furnishings throughout.",
         "amenities": AMEN_CORE + ["Elevator", "24-hour fitness center", "Doorman"],
         "images": [LR[5], BR[2], KT[2], LR[0]], "stay_paths": ["family", "corporate"], "rating": 4.8, "review_count": 34,
@@ -1417,7 +1417,7 @@ SEED_APARTMENTS = [
     {
         "title": "Logan Square Executive 1BR", "building_name": "The Alexander", "neighborhood": "Logan Square",
         "address": "1601 Vine St", "apt_type": "1 Bedroom", "bedrooms": 1, "bathrooms": 1, "max_guests": 2, "sqft": 750,
-        "nightly_rate": 169, "monthly_rate": 3600,
+        "nightly_rate": NIGHTLY_RATES[1], "monthly_rate": 3600,
         "description": "Steps from the Comcast towers and the Parkway museums. An executive one-bedroom with in-building workspace and a serious gym — built for the business week and the weekend after.",
         "amenities": AMEN_CORE + ["Dedicated workspace", "In-building workspace", "24-hour fitness center", "Doorman"],
         "images": [LR[6], BR[3], KT[3]], "stay_paths": ["corporate"], "rating": 4.8, "review_count": 29,
@@ -1427,7 +1427,7 @@ SEED_APARTMENTS = [
     {
         "title": "Manayunk Riverside 2BR", "building_name": "The Isle", "neighborhood": "Manayunk",
         "address": "4601 Flat Rock Rd", "apt_type": "2 Bedroom", "bedrooms": 2, "bathrooms": 2, "max_guests": 5, "sqft": 1050,
-        "nightly_rate": 179, "monthly_rate": 3800,
+        "nightly_rate": NIGHTLY_RATES[2], "monthly_rate": 3800,
         "description": "Riverside two-bedroom along the towpath with Main Street's restaurants a short stroll away. Free parking and space to spread out make this a family favorite.",
         "amenities": AMEN_CORE + ["Free parking", "Pool", "Pet friendly"],
         "images": [LR[7], BR[0], KT[1], LR[2]], "stay_paths": ["family"], "rating": 4.7, "review_count": 22,
@@ -1457,7 +1457,7 @@ SEED_APARTMENTS = [
     {
         "title": "Center City Corporate 2BR", "building_name": "The Metropolitan", "neighborhood": "Center City",
         "address": "117 N 15th St", "apt_type": "2 Bedroom", "bedrooms": 2, "bathrooms": 2, "max_guests": 4, "sqft": 1150,
-        "nightly_rate": 269, "monthly_rate": 5600,
+        "nightly_rate": NIGHTLY_RATES[2], "monthly_rate": 5600,
         "description": "Two bedrooms, two workspaces, one block from City Hall. Our most-booked corporate unit, with a conference-ready dining table and blackout shades for jet-lagged mornings.",
         "amenities": AMEN_CORE + ["Dedicated workspace", "In-building workspace", "Doorman", "24-hour fitness center"],
         "images": [HERO[0], BR[3], KT[2], LR[7]], "stay_paths": ["corporate"], "rating": 4.9, "review_count": 51,
@@ -1597,6 +1597,7 @@ async def seed_data(admin: dict = Depends(require_admin)):
     count = await seed_apartments()
     portfolio = await seed_portfolio()
     await seed_admin()
+    await update_apartment_nightly_rates(db)
     return {"success": True, "demo_apartments_seeded": count, "portfolio": portfolio}
 
 async def ensure_indexes():
@@ -1643,6 +1644,7 @@ async def startup_seed():
     if SEED_PORTFOLIO_DATA:
         counts = await seed_portfolio()
         logger.info(f"Seeded controlled portfolio: {counts}")
+    await update_apartment_nightly_rates(db)
 
 app.include_router(api_router)
 

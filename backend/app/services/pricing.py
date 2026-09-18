@@ -6,6 +6,22 @@ from dataclasses import asdict, dataclass
 from decimal import Decimal, ROUND_HALF_UP
 
 
+NIGHTLY_RATES = {1: 250, 2: 350}
+NIGHTLY_RATE_VERSION = "2026-09-18"
+
+
+async def update_apartment_nightly_rates(db):
+    """Apply the approved rates once per apartment, preserving later admin edits."""
+    updated = 0
+    for bedrooms, rate in NIGHTLY_RATES.items():
+        result = await db.apartments.update_many(
+            {"bedrooms": bedrooms, "nightly_rate_version": {"$ne": NIGHTLY_RATE_VERSION}},
+            {"$set": {"nightly_rate": rate, "nightly_rate_version": NIGHTLY_RATE_VERSION}},
+        )
+        updated += result.modified_count
+    return updated
+
+
 SHORT_STAY_TAX_RATE = Decimal("0.155")
 
 

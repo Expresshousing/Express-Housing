@@ -53,3 +53,48 @@ def test_thirty_night_quote_uses_monthly_rate_without_hotel_tax():
     assert quote["tax_rate"] == 0
     assert quote["taxes"] == 0
     assert quote["total"] == 3975
+
+
+def test_all_portfolio_listings_use_approved_nightly_rates_in_quotes():
+    _, _, listings = build_portfolio()
+    for listing in listings:
+        expected_rate = {1: 250, 2: 350}[listing["bedrooms"]]
+        assert listing["nightly_rate"] == expected_rate
+        quote = calculate_quote(
+            nights=3,
+            nightly_rate=listing["nightly_rate"],
+            monthly_rate=listing["monthly_rate"],
+            cleaning_fee=listing["cleaning_fee"],
+        ).as_dict()
+        assert quote["accommodation"] == expected_rate * 3
+
+
+def test_saved_apartment_rate_update_is_idempotent_and_preserves_other_prices():
+    import asyncio
+    from mongomock_motor import AsyncMongoMockClient
+    from backend.app.services.pricing import update_apartment_nightly_rates
+
+    async def check():
+        client = AsyncMongoMockClient()
+        db = client["nightly_rate_update_test"]
+        await db.apartments.insert_many([
+            {"id": "one", "bedrooms": 1, "nightly_rate": 150, "monthly_rate": 3000, "cleaning_fee": 125},
+            {"id": "two", "bedrooms": 2, "nightly_rate": 175, "monthly_rate": 3500, "cleaning_fee": 175},
+            {"id": "studio", "bedrooms": 0, "nightly_rate": 119},
+        ])
+        await db.bookings.insert_one({"id": "existing", "total": 490.88})
+        assert await update_apartment_nightly_rates(db) == 2
+        one = await db.apartments.find_one({"id": "one"})
+        two = await db.apartments.find_one({"id": "two"})
+        assert (one["nightly_rate"], two["nightly_rate"]) == (250, 350)
+        assert (one["monthly_rate"], two["monthly_rate"]) == (3000, 3500)
+        assert (one["cleaning_fee"], two["cleaning_fee"]) == (125, 175)
+        assert (await db.apartments.find_one({"id": "studio"}))["nightly_rate"] == 119
+        assert (await db.bookings.find_one({"id": "existing"}))["total"] == 490.88
+        assert await update_apartment_nightly_rates(db) == 0
+        await db.apartments.update_one({"id": "one"}, {"$set": {"nightly_rate": 275}})
+        assert await update_apartment_nightly_rates(db) == 0
+        assert (await db.apartments.find_one({"id": "one"}))["nightly_rate"] == 275
+        client.close()
+
+    asyncio.run(check())

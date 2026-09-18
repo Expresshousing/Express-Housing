@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import uuid
 
+from backend.app.services.pricing import NIGHTLY_RATES
+
 
 PORTFOLIO_VERSION = "2026-08-18"
 
@@ -267,7 +269,7 @@ def build_portfolio():
 
         for bedrooms, code in ((1, "1br"), (2, "2br")):
             monthly_rate = 3000 if bedrooms == 1 else 3500
-            nightly_rate = 150 if bedrooms == 1 else 175
+            nightly_rate = NIGHTLY_RATES[bedrooms]
             cleaning_fee = 125 if bedrooms == 1 else 175
             listing_slug = f"{raw['slug']}-{code}"
             listing_id = stable_id("listing", listing_slug)
