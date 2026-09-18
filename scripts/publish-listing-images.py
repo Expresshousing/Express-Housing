@@ -46,6 +46,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("slug", nargs="?", default="the-hannah", help="building slug, e.g. the-hannah")
     ap.add_argument("--api", default=DEFAULT_API, help=f"API base URL (default {DEFAULT_API})")
+    ap.add_argument("--email", help="admin email (otherwise prompted)")
+    ap.add_argument(
+        "--password-file",
+        help="file holding the admin password on its first line. Avoids the hidden prompt, "
+             "which some terminals mishandle on paste, and keeps the password out of shell history.",
+    )
     args = ap.parse_args()
 
     if args.slug not in BUILDING_IMAGES:
@@ -67,8 +73,14 @@ def main():
     if input("\nApply? [y/N] ").strip().lower() != "y":
         sys.exit("aborted")
 
-    email = input("Admin email: ").strip()
-    password = getpass.getpass("Admin password: ")
+    email = (args.email or input("Admin email: ")).strip()
+    if args.password_file:
+        password = Path(args.password_file).read_text().splitlines()[0]
+    else:
+        password = getpass.getpass("Admin password: ")
+    if not password.strip():
+        sys.exit("No password received. Some terminals drop a paste into a hidden prompt — "
+                 "use --password-file, or type the password by hand.")
     token = call(f"{args.api}/api/auth/login", {"email": email, "password": password}, method="POST")["access_token"]
 
     for l in targets:
