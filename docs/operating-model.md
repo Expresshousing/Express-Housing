@@ -98,16 +98,19 @@ The codebase encrypts stored access codes and Wi-Fi passwords with a separate `A
 - Two-bedroom: $3,500 per 30-night month.
 - Parking: $300 per month, subject to availability.
 
-### Provisional short-stay prices
+### Short-stay prices
 
-Until Express Housing approves a revenue plan or connects a dynamic-pricing provider:
+Approved nightly rates, effective 2026-09-18:
 
-- one-bedroom: $150/night;
-- two-bedroom: $175/night;
+- one-bedroom: $250/night;
+- two-bedroom: $350/night.
+
+Provisional cleaning fees, pending actual turnover costing:
+
 - one-bedroom cleaning: $125/stay;
 - two-bedroom cleaning: $175/stay.
 
-The nightly amounts are transparent provisional multipliers of the supplied monthly economics, not copied competitor prices. Cleaning should ultimately be actual turnover cost plus any approved margin. The admin and guest interfaces label these values provisional.
+The nightly rates are set by Express Housing rather than derived from the supplied monthly economics, and they supersede the earlier provisional $150/$175 multipliers. They are held in one place, `NIGHTLY_RATES` in `backend/app/services/pricing.py`, which both the seeded demo apartments and the controlled portfolio fixtures read from. A versioned migration applies them to saved apartment records once, so a later per-apartment rate set by an operator is never overwritten. Studio and three-bedroom demo units are outside this approval and keep their existing rates. Cleaning should ultimately be actual turnover cost plus any approved margin; the admin and guest interfaces label the cleaning values provisional.
 
 For 30 nights or longer, the supplied monthly rate is prorated by `monthly_rate / 30 × nights`. Parking is prorated only for stays of 30 nights or longer. Short-stay parking is requested but excluded from the quote until Express Housing defines a daily rule.
 
