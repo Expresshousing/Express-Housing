@@ -63,6 +63,15 @@ Local URLs:
 - Operations dashboard: `http://localhost:3000/admin`
 - Building partner dashboard: `http://localhost:3000/partner`
 
+If the site loads but shows no apartments, check `CORS_ORIGINS` in `backend/.env` before
+anything else. It must contain the exact origin serving the frontend, port included, and a
+mismatch is silent from the command line — `curl` ignores CORS, so the API looks healthy
+while the browser blocks every request the page makes. Restart the backend after changing it.
+
+Changing fixtures or images reaches a running server only on restart, since the portfolio is
+seeded at startup. A production build under `frontend/build/` serves its own copy of
+`frontend/public/`, so rebuild it too rather than expecting edits to appear.
+
 Portfolio fixtures are safe to rerun: operator-entered unit readiness fields are preserved. Demo data should only be enabled in a local development database. Never reuse example secrets, encryption keys or passwords in a deployed environment.
 
 Normal sign-in sends each user to the correct guest, operations or building portal based on their server-controlled role. See [docs/image-sources.md](docs/image-sources.md) for the official source and scope of every imported building image.
