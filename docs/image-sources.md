@@ -14,6 +14,10 @@ On 2026-08-18, Express Housing supplied and authorized 11 additional image files
 
 These images now power the homepage slideshow and the matching building galleries. No supplied file was identified as Edgewater II, so that gallery continues to use its authorized official-site images rather than assigning an uncertain photograph to the building.
 
+On 2026-09-18, Express Housing supplied and authorized 15 further AVIF files for The Hannah from `/Users/gloriaamagbakhen/Downloads/`. Local copies are stored in `frontend/public/images/operator-portfolio/` under `the-hannah-*.avif`; the originals remain unchanged. They cover the building entrance, lobby, resident lounges, community kitchen and dining, media room, coworking nook, fitness center, yoga studio and courtyard.
+
+These 15 arrived as operator-supplied files rather than as downloads from the building website, so they carry the building site as their source rather than a per-file URL, exactly as the 2026-08-18 batch does. Their delivered filenames were opaque identifiers and the format is AVIF, neither of which matches the naming or format the official site serves — so the underlying origin has not been independently confirmed. Confirm it with Express Housing before the photo-rights launch gate is cleared.
+
 ## Broad + Noble
 
 - `model-kitchen.webp` — [official source](https://www.livebroadandnoble.com/wp-content/uploads/2026/03/01-SMP_25_BroadandNoble_Model_KitchenandDining-min-jpg-webp-1-1200x800.webp)
@@ -22,9 +26,26 @@ These images now power the homepage slideshow and the matching building gallerie
 
 ## The Hannah
 
+Official-site download still in the gallery:
+
 - `model-one-bedroom.jpg` — [official source](https://thehannahcallowhill.com/assets/images/cache/1bedroom-1W1-0228abb712c121d26f4c318d37356a52.jpg)
+
+Operator-supplied, 2026-09-18, in `operator-portfolio/` (source: <https://thehannahcallowhill.com/>):
+
+- `the-hannah-exterior-entrance.avif`, `the-hannah-exterior-entrance-street.avif` — building entrance
+- `the-hannah-lobby-fireplace-lounge.avif`, `the-hannah-lobby-fireplace-seating.avif`, `the-hannah-lobby-window-seating.avif` — lobby
+- `the-hannah-resident-lounge-brick.avif`, `the-hannah-resident-lounge-billiards.avif` — resident lounge
+- `the-hannah-community-kitchen-island.avif`, `the-hannah-community-kitchen-bar.avif`, `the-hannah-community-dining-table.avif` — community kitchen and dining
+- `the-hannah-media-room.avif`, `the-hannah-study-nook.avif` — media room and coworking nook
+- `the-hannah-fitness-center.avif`, `the-hannah-fitness-yoga-studio.avif` — fitness center and yoga studio
+- `the-hannah-courtyard-grilling-terrace.avif` — courtyard
+
+Downloaded but no longer in the gallery (2026-09-18), kept on disk:
+
 - `business-center.jpg` — [official source](https://thehannahcallowhill.com/assets/images/cache/business_center-c29e0f0128970bb39c3fa691b6ee0249.jpg)
 - `exterior.jpg` — [official source](https://thehannahcallowhill.com/assets/images/cache/STANGOPHILLYATDUSK-14-44abffee167610c1334c1d4c82604375.jpg)
+- `operator-portfolio/the-hannah-entrance.jpg` — still used by the homepage slideshow
+- `operator-portfolio/clubhouse.jpg` — no longer referenced anywhere
 
 ## Edgewater II
 
