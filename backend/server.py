@@ -1603,6 +1603,16 @@ SUPPORT_ATTACHMENTS_MAX = 4
 # each one before upload, so a maintenance photo lands well inside this ceiling,
 # and it keeps attachments working on a host whose own disk is wiped on deploy.
 SUPPORT_ATTACHMENT_MAX_BYTES = 2_000_000
+# Raster formats only, and base64 only. "data:image/" alone would also admit
+# image/svg+xml, which is a document that can carry script: a guest could attach
+# one and the person who opens it is the operator, inside the admin session.
+# The browser only ever sends JPEG from its canvas, so nothing legitimate is lost.
+SUPPORT_ATTACHMENT_PREFIXES = (
+    "data:image/jpeg;base64,",
+    "data:image/png;base64,",
+    "data:image/webp;base64,",
+    "data:image/gif;base64,",
+)
 
 
 class SupportMessageCreate(BaseModel):
@@ -1613,8 +1623,8 @@ class SupportMessageCreate(BaseModel):
     @classmethod
     def only_images_within_size(cls, values: List[str]) -> List[str]:
         for value in values:
-            if not value.startswith("data:image/"):
-                raise ValueError("Attachments must be images")
+            if not value.startswith(SUPPORT_ATTACHMENT_PREFIXES):
+                raise ValueError("Attachments must be JPEG, PNG, WebP or GIF photos")
             if len(value) > SUPPORT_ATTACHMENT_MAX_BYTES:
                 raise ValueError("That photo is too large. Please send a smaller one.")
         return values
