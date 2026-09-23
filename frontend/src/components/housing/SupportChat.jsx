@@ -215,29 +215,26 @@ export function ChatWindow({
           boxShadow: isDarkMode ? "none" : "-24px 0 70px rgba(0,0,0,0.16)",
         }}
       >
-        <header className="flex items-start justify-between gap-4 px-6 pb-6 pt-7 md:px-10 md:pt-9">
+        <header className="flex items-center justify-between gap-3 border-b px-4 py-3 md:px-6" style={{ borderColor: c.BORDER }}>
           <div className="min-w-0">
-            <div className="flex items-center gap-3">
-              <span className="h-0.5 w-8 shrink-0" style={{ background: c.BLUE }} aria-hidden="true" />
-              <p className="truncate text-[11px] font-bold uppercase tracking-[0.24em]" style={{ color: c.BLUE }}>{eyebrow}</p>
-            </div>
-            <h2 className="mt-4 truncate text-[34px] font-extrabold leading-none md:text-[46px]">{title}</h2>
-            {subtitle && <p className="mt-3 max-w-2xl text-[15px] leading-relaxed" style={{ color: c.MUTED }}>{subtitle}</p>}
+            <p className="truncate text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: c.BLUE }}>{eyebrow}</p>
+            <h2 className="truncate text-[19px] font-extrabold leading-tight md:text-[21px]">{title}</h2>
+            {subtitle && <p className="truncate text-[12px]" style={{ color: c.MUTED }}>{subtitle}</p>}
           </div>
+          {/* Stays a full 44px target: small buttons are hardest on exactly the
+              people this chat is for. Only the chrome around it shrank. */}
           <button
             type="button"
             onClick={onClose}
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-opacity hover:opacity-70"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-opacity hover:opacity-70"
             style={{ background: c.CARD2, color: c.TEXT }}
             title={closeLabel}
             aria-label={closeLabel}
             data-testid="chat-close"
           >
-            <X size={22} />
+            <X size={20} />
           </button>
         </header>
-
-        <div className="border-b" style={{ borderColor: c.BORDER }} />
 
         <div ref={listRef} className="flex-1 space-y-4 overflow-y-auto px-6 py-6 md:px-10" data-testid="chat-messages">
           <div className="space-y-4">
@@ -258,13 +255,13 @@ export function ChatWindow({
       </div>
 
 
-        <div className="border-t px-6 py-4 md:px-10" style={{ borderColor: c.BORDER, background: c.CARD }}>
+        <div className="border-t px-4 py-2.5 md:px-6" style={{ borderColor: c.BORDER, background: c.CARD }}>
           <div>
           {photos.length > 0 && (
-            <div className="mb-3 flex flex-wrap gap-2" data-testid="chat-pending-photos">
+            <div className="mb-2 flex flex-wrap gap-2" data-testid="chat-pending-photos">
               {photos.map((src, index) => (
                 <div key={index} className="relative">
-                  <img src={src} alt={`Attached ${index + 1}`} className="h-20 w-20 rounded-xl object-cover" />
+                  <img src={src} alt={`Attached ${index + 1}`} className="h-14 w-14 rounded-lg object-cover" />
                   <button
                     type="button"
                     onClick={() => setPhotos((current) => current.filter((_, i) => i !== index))}
@@ -280,6 +277,7 @@ export function ChatWindow({
           )}
 
           <label className="sr-only" htmlFor="chat-input">Your message</label>
+          {/* 16px text stops phones zooming the page when this is focused. */}
           <textarea
             id="chat-input"
             className="input-eh"
@@ -288,30 +286,30 @@ export function ChatWindow({
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
             onKeyDown={(event) => { if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) submit(); }}
-            style={{ fontSize: 16 }}
+            style={{ fontSize: 16, paddingTop: 8, paddingBottom: 8, minHeight: 56 }}
             data-testid="chat-input"
           />
 
-          <div className="mt-3 flex items-center justify-between gap-3">
+          <div className="mt-2 flex items-center justify-between gap-2">
             <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={addPhotos} data-testid="chat-file-input" />
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={preparing || photos.length >= MAX_ATTACHMENTS}
-              className="flex items-center gap-2 rounded-full border px-4 py-3 text-[15px] font-bold"
+              className="flex min-h-11 items-center gap-2 rounded-full border px-4 text-[14px] font-bold"
               style={{ borderColor: c.BORDER, color: c.TEXT }}
               data-testid="chat-add-photo"
             >
-              <ImagePlus size={19} /> {preparing ? "Adding…" : "Add photo"}
+              <ImagePlus size={18} /> {preparing ? "Adding…" : "Add photo"}
             </button>
             <button
               type="button"
-              style={primaryButtonStyle(c)}
+              style={primaryButtonStyle(c, { padding: "0 18px" })}
               onClick={submit}
               disabled={sending || (!draft.trim() && !photos.length)}
               data-testid="chat-send"
             >
-              <span className="flex items-center gap-2 text-[15px]"><Send size={18} />{sending ? "Sending…" : "Send"}</span>
+              <span className="flex items-center gap-2 text-[14px]"><Send size={17} />{sending ? "Sending…" : "Send"}</span>
             </button>
           </div>
           </div>
@@ -373,7 +371,7 @@ export default function SupportChat({ onClose }) {
     <ChatWindow
       eyebrow="Express Housing"
       title="Support"
-      subtitle="Message the team about anything to do with your stay — access, maintenance, dates or checkout. Add a photo if something needs fixing."
+      subtitle="Access, maintenance, dates or checkout. Photos welcome."
       messages={messages}
       mineSender="guest"
       theirLabel="Express Housing"
