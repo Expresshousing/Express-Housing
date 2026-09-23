@@ -55,6 +55,7 @@ export default function MessagesView({ threads = [], onReload }) {
     return (
       <ChatWindow
         eyebrow="Messages"
+        subtitleClamp="truncate"
         title={thread.user_name || thread.user_email}
         subtitle={[thread.user_email, bookingLine(threads, thread.user_id)].filter(Boolean).join(" · ")}
         messages={thread.messages}

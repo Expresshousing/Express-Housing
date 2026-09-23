@@ -120,6 +120,9 @@ export function ChatWindow({
   mineSender,
   loading = false,
   emptyHint,
+  // The guest's line is a sentence and should wrap; a thread's line is an
+  // email and stay, which reads better clipped than folded onto two rows.
+  subtitleClamp = "line-clamp-2",
   onSend,
   onClose,
   closeLabel = "Close",
@@ -218,7 +221,7 @@ export function ChatWindow({
           <div className="min-w-0">
             <p className="truncate text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: c.BLUE }}>{eyebrow}</p>
             <h2 className="truncate text-[19px] font-extrabold leading-tight md:text-[21px]">{title}</h2>
-            {subtitle && <p className="truncate text-[12px]" style={{ color: c.MUTED }}>{subtitle}</p>}
+            {subtitle && <p className={`text-[12px] leading-snug ${subtitleClamp}`} style={{ color: c.MUTED }}>{subtitle}</p>}
           </div>
           {/* Stays a full 44px target: small buttons are hardest on exactly the
               people this chat is for. Only the chrome around it shrank. */}
@@ -370,7 +373,7 @@ export default function SupportChat({ onClose }) {
     <ChatWindow
       eyebrow="Express Housing"
       title="Support"
-      subtitle="Access, maintenance, dates or checkout. Photos welcome."
+      subtitle="Message the team about anything to do with your stay — access, maintenance, dates or checkout. Add a photo if something needs fixing."
       messages={messages}
       mineSender="guest"
       loading={loading}
