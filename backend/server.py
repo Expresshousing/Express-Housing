@@ -1592,6 +1592,138 @@ async def seed_admin():
         })
         logger.info("Created bootstrap admin user")
 
+# --------------------------------------------------------------- Support chat
+# One thread per guest: every message carries the guest's user_id, and "sender"
+# says which side wrote it. Read flags are per side, so an unread count means
+# "written by the other party and not yet opened by this one".
+
+SUPPORT_MESSAGE_MAX = 4000
+
+
+class SupportMessageCreate(BaseModel):
+    body: str = Field(min_length=1, max_length=SUPPORT_MESSAGE_MAX)
+
+
+def _support_public(message: dict) -> dict:
+    return {
+        "id": message["id"],
+        "sender": message["sender"],
+        "body": message["body"],
+        "created_at": message["created_at"],
+    }
+
+
+async def _store_support_message(*, guest: dict, sender: str, body: str) -> dict:
+    text = body.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Message cannot be empty")
+    message = {
+        "id": str(uuid.uuid4()),
+        "user_id": guest["id"],
+        "user_name": guest.get("name") or guest.get("email", ""),
+        "user_email": guest.get("email", ""),
+        "sender": sender,
+        "body": text[:SUPPORT_MESSAGE_MAX],
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        # Whoever wrote it has read it; the other side has not.
+        "read_by_admin": sender == "admin",
+        "read_by_guest": sender == "guest",
+    }
+    await db.support_messages.insert_one({**message})
+    return _support_public(message)
+
+
+@api_router.get("/support/messages")
+async def get_support_messages(user: dict = Depends(get_current_user)):
+    """The signed-in guest's own thread. Opening it clears their unread badge."""
+    await db.support_messages.update_many(
+        {"user_id": user["id"], "sender": "admin", "read_by_guest": False},
+        {"$set": {"read_by_guest": True}},
+    )
+    messages = await db.support_messages.find(
+        {"user_id": user["id"]}, {"_id": 0}
+    ).sort("created_at", 1).to_list(500)
+    return {"messages": [_support_public(m) for m in messages]}
+
+
+@api_router.get("/support/unread")
+async def get_support_unread(user: dict = Depends(get_current_user)):
+    unread = await db.support_messages.count_documents(
+        {"user_id": user["id"], "sender": "admin", "read_by_guest": False}
+    )
+    return {"unread": unread}
+
+
+@api_router.post("/support/messages")
+async def send_support_message(payload: SupportMessageCreate, user: dict = Depends(get_current_user)):
+    if user.get("role") == "admin":
+        raise HTTPException(status_code=400, detail="Admins reply from the operations dashboard")
+    return await _store_support_message(guest=user, sender="guest", body=payload.body)
+
+
+@api_router.get("/admin/support/threads")
+async def admin_support_threads(admin: dict = Depends(require_admin)):
+    """One row per guest, newest conversation first, with the unread count."""
+    messages = await db.support_messages.find({}, {"_id": 0}).sort("created_at", 1).to_list(5000)
+    threads: dict = {}
+    for message in messages:
+        thread = threads.setdefault(message["user_id"], {
+            "user_id": message["user_id"],
+            "user_name": message.get("user_name", ""),
+            "user_email": message.get("user_email", ""),
+            "unread": 0,
+            "message_count": 0,
+            "last_message": "",
+            "last_sender": "",
+            "last_at": "",
+        })
+        thread["message_count"] += 1
+        thread["last_message"] = message["body"]
+        thread["last_sender"] = message["sender"]
+        thread["last_at"] = message["created_at"]
+        if message["sender"] == "guest" and not message.get("read_by_admin"):
+            thread["unread"] += 1
+
+    rows = sorted(threads.values(), key=lambda row: row["last_at"], reverse=True)
+    for row in rows:
+        # Booking context so the inbox reads as a list of renters, not user ids.
+        booking = await db.bookings.find_one(
+            {"user_id": row["user_id"]},
+            {"_id": 0, "apartment_title": 1, "check_in": 1, "check_out": 1, "status": 1},
+            sort=[("check_in", -1)],
+        )
+        row["booking"] = booking
+    return {"threads": rows, "unread_total": sum(row["unread"] for row in rows)}
+
+
+@api_router.get("/admin/support/threads/{user_id}")
+async def admin_support_thread(user_id: str, admin: dict = Depends(require_admin)):
+    """Opening a thread marks that guest's messages read, which clears the badge."""
+    await db.support_messages.update_many(
+        {"user_id": user_id, "sender": "guest", "read_by_admin": False},
+        {"$set": {"read_by_admin": True}},
+    )
+    messages = await db.support_messages.find(
+        {"user_id": user_id}, {"_id": 0}
+    ).sort("created_at", 1).to_list(500)
+    if not messages:
+        raise HTTPException(status_code=404, detail="No messages from this guest")
+    return {
+        "user_id": user_id,
+        "user_name": messages[-1].get("user_name", ""),
+        "user_email": messages[-1].get("user_email", ""),
+        "messages": [_support_public(m) for m in messages],
+    }
+
+
+@api_router.post("/admin/support/threads/{user_id}")
+async def admin_reply_support(user_id: str, payload: SupportMessageCreate, admin: dict = Depends(require_admin)):
+    guest = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not guest:
+        raise HTTPException(status_code=404, detail="Guest not found")
+    return await _store_support_message(guest=guest, sender="admin", body=payload.body)
+
+
 @api_router.post("/seed")
 async def seed_data(admin: dict = Depends(require_admin)):
     count = await seed_apartments()
@@ -1602,6 +1734,7 @@ async def seed_data(admin: dict = Depends(require_admin)):
 
 async def ensure_indexes():
     await db.users.create_index("email", unique=True)
+    await db.support_messages.create_index([("user_id", 1), ("created_at", 1)])
     await db.apartments.create_index("id", unique=True)
     await db.buildings.create_index("id", unique=True)
     await db.buildings.create_index("slug", unique=True)
