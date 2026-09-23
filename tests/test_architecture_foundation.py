@@ -574,11 +574,9 @@ def test_support_endpoints_reject_anonymous_blank_and_non_admin_callers():
             json={"body": "approved"},
         ).status_code == 403
 
-        # Whitespace-only passes the length check, so the strip guard rejects it.
-        blank = client.post("/api/support/messages", headers=guest_headers, json={"body": "   "})
-        assert blank.status_code == 400
-        assert blank.json()["detail"] == "Message cannot be empty"
-        # An entirely empty body is caught earlier, by validation.
+        # Neither whitespace nor an empty body is a message, and since photos
+        # became a valid message on their own both are caught in validation.
+        assert client.post("/api/support/messages", headers=guest_headers, json={"body": "   "}).status_code == 422
         assert client.post("/api/support/messages", headers=guest_headers, json={"body": ""}).status_code == 422
 
         headers = admin_headers(client)
@@ -588,3 +586,63 @@ def test_support_endpoints_reject_anonymous_blank_and_non_admin_callers():
             headers=headers,
             json={"body": "hello"},
         ).status_code == 404
+
+
+TINY_PNG = (
+    "data:image/png;base64,"
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+)
+
+
+def test_support_message_carries_photos_and_rejects_non_image_or_oversized_ones():
+    with TestClient(server.app) as client:
+        guest = register_guest(client, "support-photos@example.com")
+        headers = {"Authorization": f"Bearer {guest['access_token']}"}
+
+        # A photo with no words is a complete message: "here is what is broken".
+        sent = client.post("/api/support/messages", headers=headers, json={"body": "", "attachments": [TINY_PNG]})
+        assert sent.status_code == 200
+        assert sent.json()["attachments"] == [TINY_PNG]
+        assert sent.json()["body"] == ""
+
+        # Text and photos together survive the round trip.
+        client.post(
+            "/api/support/messages",
+            headers=headers,
+            json={"body": "The tap under here drips", "attachments": [TINY_PNG, TINY_PNG]},
+        )
+        thread = client.get("/api/support/messages", headers=headers).json()["messages"]
+        assert [len(m["attachments"]) for m in thread] == [1, 2]
+
+        # Neither words nor a photo is not a message.
+        assert client.post("/api/support/messages", headers=headers, json={"body": "   ", "attachments": []}).status_code == 422
+
+        # Only images, and only ones the browser has already shrunk.
+        assert client.post(
+            "/api/support/messages", headers=headers,
+            json={"body": "", "attachments": ["data:application/pdf;base64,AAAA"]},
+        ).status_code == 422
+        assert client.post(
+            "/api/support/messages", headers=headers,
+            json={"body": "", "attachments": ["data:image/png;base64," + "A" * 2_000_001]},
+        ).status_code == 422
+        assert client.post(
+            "/api/support/messages", headers=headers,
+            json={"body": "too many", "attachments": [TINY_PNG] * 5},
+        ).status_code == 422
+
+        # The operator can send photos back, and the inbox preview names them.
+        headers_admin = admin_headers(client)
+        inbox = client.get("/api/admin/support/threads", headers=headers_admin).json()
+        row = next(r for r in inbox["threads"] if r["user_email"] == "support-photos@example.com")
+        reply = client.post(
+            f"/api/admin/support/threads/{row['user_id']}",
+            headers=headers_admin,
+            json={"body": "", "attachments": [TINY_PNG]},
+        )
+        assert reply.status_code == 200
+        assert reply.json()["attachments"] == [TINY_PNG]
+
+        refreshed = client.get("/api/admin/support/threads", headers=headers_admin).json()
+        row = next(r for r in refreshed["threads"] if r["user_email"] == "support-photos@example.com")
+        assert row["last_message"] == "1 photo"

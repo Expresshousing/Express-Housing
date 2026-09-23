@@ -10,7 +10,7 @@ import asyncio
 import logging
 import requests
 from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict, EmailStr, field_validator
+from pydantic import BaseModel, Field, ConfigDict, EmailStr, field_validator, model_validator
 from typing import Any, List, Optional, Literal
 import uuid
 from datetime import datetime, timezone, date, timedelta
@@ -1598,10 +1598,32 @@ async def seed_admin():
 # "written by the other party and not yet opened by this one".
 
 SUPPORT_MESSAGE_MAX = 4000
+SUPPORT_ATTACHMENTS_MAX = 4
+# Photos ride along inside the message document as data URIs. The browser shrinks
+# each one before upload, so a maintenance photo lands well inside this ceiling,
+# and it keeps attachments working on a host whose own disk is wiped on deploy.
+SUPPORT_ATTACHMENT_MAX_BYTES = 2_000_000
 
 
 class SupportMessageCreate(BaseModel):
-    body: str = Field(min_length=1, max_length=SUPPORT_MESSAGE_MAX)
+    body: str = Field(default="", max_length=SUPPORT_MESSAGE_MAX)
+    attachments: List[str] = Field(default_factory=list, max_length=SUPPORT_ATTACHMENTS_MAX)
+
+    @field_validator("attachments")
+    @classmethod
+    def only_images_within_size(cls, values: List[str]) -> List[str]:
+        for value in values:
+            if not value.startswith("data:image/"):
+                raise ValueError("Attachments must be images")
+            if len(value) > SUPPORT_ATTACHMENT_MAX_BYTES:
+                raise ValueError("That photo is too large. Please send a smaller one.")
+        return values
+
+    @model_validator(mode="after")
+    def needs_text_or_photo(self):
+        if not self.body.strip() and not self.attachments:
+            raise ValueError("Write a message or attach a photo")
+        return self
 
 
 def _support_public(message: dict) -> dict:
@@ -1609,13 +1631,15 @@ def _support_public(message: dict) -> dict:
         "id": message["id"],
         "sender": message["sender"],
         "body": message["body"],
+        "attachments": message.get("attachments", []),
         "created_at": message["created_at"],
     }
 
 
-async def _store_support_message(*, guest: dict, sender: str, body: str) -> dict:
+async def _store_support_message(*, guest: dict, sender: str, body: str, attachments: Optional[List[str]] = None) -> dict:
     text = body.strip()
-    if not text:
+    attachments = attachments or []
+    if not text and not attachments:
         raise HTTPException(status_code=400, detail="Message cannot be empty")
     message = {
         "id": str(uuid.uuid4()),
@@ -1624,6 +1648,7 @@ async def _store_support_message(*, guest: dict, sender: str, body: str) -> dict
         "user_email": guest.get("email", ""),
         "sender": sender,
         "body": text[:SUPPORT_MESSAGE_MAX],
+        "attachments": attachments,
         "created_at": datetime.now(timezone.utc).isoformat(),
         # Whoever wrote it has read it; the other side has not.
         "read_by_admin": sender == "admin",
@@ -1658,7 +1683,7 @@ async def get_support_unread(user: dict = Depends(get_current_user)):
 async def send_support_message(payload: SupportMessageCreate, user: dict = Depends(get_current_user)):
     if user.get("role") == "admin":
         raise HTTPException(status_code=400, detail="Admins reply from the operations dashboard")
-    return await _store_support_message(guest=user, sender="guest", body=payload.body)
+    return await _store_support_message(guest=user, sender="guest", body=payload.body, attachments=payload.attachments)
 
 
 @api_router.get("/admin/support/threads")
@@ -1678,7 +1703,10 @@ async def admin_support_threads(admin: dict = Depends(require_admin)):
             "last_at": "",
         })
         thread["message_count"] += 1
-        thread["last_message"] = message["body"]
+        photo_count = len(message.get("attachments", []))
+        thread["last_message"] = message["body"] or (
+            f"{photo_count} photo{'' if photo_count == 1 else 's'}" if photo_count else ""
+        )
         thread["last_sender"] = message["sender"]
         thread["last_at"] = message["created_at"]
         if message["sender"] == "guest" and not message.get("read_by_admin"):
@@ -1721,7 +1749,7 @@ async def admin_reply_support(user_id: str, payload: SupportMessageCreate, admin
     guest = await db.users.find_one({"id": user_id}, {"_id": 0})
     if not guest:
         raise HTTPException(status_code=404, detail="Guest not found")
-    return await _store_support_message(guest=guest, sender="admin", body=payload.body)
+    return await _store_support_message(guest=guest, sender="admin", body=payload.body, attachments=payload.attachments)
 
 
 @api_router.post("/seed")
