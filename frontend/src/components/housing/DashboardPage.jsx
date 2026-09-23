@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
+import SupportChat from "./SupportChat";
 import { apiErrorMessage } from "@/lib/apiError";
 import { useAuth } from "@/App";
 import ApartmentCard from "@/components/housing/ApartmentCard";
@@ -214,11 +215,13 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const tab = searchParams.get("tab") === "saved" ? "saved" : "stays";
+  const requestedTab = searchParams.get("tab");
+  const tab = ["saved", "support"].includes(requestedTab) ? requestedTab : "stays";
   const [bookings, setBookings] = useState([]);
   const [saved, setSaved] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusAlerts, setStatusAlerts] = useState([]);
+  const [supportUnread, setSupportUnread] = useState(0);
 
   const wasAuthedRef = useRef(false);
   useEffect(() => { if (user) wasAuthedRef.current = true; }, [user]);
@@ -233,6 +236,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
+    api.get("/support/unread").then(({ data }) => setSupportUnread(data.unread || 0)).catch(() => {});
     Promise.all([api.get("/bookings"), api.get("/wishlist")]).then(([bookingsResponse, wishlistResponse]) => {
       setBookings(bookingsResponse.data); setSaved(wishlistResponse.data);
       try { const key = `eh_seen_statuses_${user.id}`; const seen = JSON.parse(localStorage.getItem(key) || "{}"); setStatusAlerts(bookingsResponse.data.filter((booking) => seen[booking.id] && seen[booking.id] !== booking.status && ALERT_CONFIG[booking.status])); const next = {}; bookingsResponse.data.forEach((booking) => { next[booking.id] = booking.status; }); localStorage.setItem(key, JSON.stringify(next)); } catch { /* Storage can be unavailable without affecting the portal. */ }
@@ -240,7 +244,7 @@ export default function DashboardPage() {
   }, [user]);
 
   if (authLoading || !user) return null;
-  const tabs = [{ key: "stays", label: `My stays (${bookings.length})` }, { key: "saved", label: `Saved (${saved.length})` }];
+  const tabs = [{ key: "stays", label: `My stays (${bookings.length})` }, { key: "saved", label: `Saved (${saved.length})` }, { key: "support", label: "Support", badge: supportUnread }];
 
   return (
     <div className="pb-20 pt-10" style={pageStyle(c)} data-testid="dashboard">
@@ -251,9 +255,9 @@ export default function DashboardPage() {
 
         {statusAlerts.length > 0 && <div className="mt-8 space-y-2" data-testid="status-alerts">{statusAlerts.map((alert) => { const config = ALERT_CONFIG[alert.status]; const tone = c[config.tone]; return <div key={alert.id} className="flex items-start gap-3 rounded-xl px-4 py-3 text-[13px]" style={{ background: `${tone}12`, border: `1px solid ${tone}33`, color: c.TEXT }} data-testid={`status-alert-${alert.id}`}><config.icon size={18} color={tone} /><p className="flex-1">{config.text(alert.apartment_title)} <span style={{ color: c.MUTED }}>({alert.check_in} → {alert.check_out})</span></p><button type="button" onClick={() => setStatusAlerts((current) => current.filter((item) => item.id !== alert.id))} aria-label="Dismiss" className="flex items-center justify-center rounded-lg" style={{ color: c.MUTED }}><X size={16} /></button></div>; })}</div>}
 
-        <div className="mt-12 flex gap-2 border-b" style={{ borderColor: c.BORDER }}>{tabs.map((item) => <button type="button" key={item.key} onClick={() => setSearchParams(item.key === "saved" ? { tab: "saved" } : {})} className="nav-btn rounded-t-xl px-4 py-3 text-[14px] font-bold" style={{ color: tab === item.key ? c.TEXT : c.MUTED, borderBottom: `2px solid ${tab === item.key ? c.BLUE : "transparent"}` }} data-testid={`dashboard-tab-${item.key}`}>{item.label}</button>)}</div>
+        <div className="mt-12 flex gap-2 border-b" style={{ borderColor: c.BORDER }}>{tabs.map((item) => <button type="button" key={item.key} onClick={() => { setSearchParams(item.key === "stays" ? {} : { tab: item.key }); if (item.key === "support") setSupportUnread(0); }} className="nav-btn flex items-center gap-2 rounded-t-xl px-4 py-3 text-[14px] font-bold" style={{ color: tab === item.key ? c.TEXT : c.MUTED, borderBottom: `2px solid ${tab === item.key ? c.BLUE : "transparent"}` }} data-testid={`dashboard-tab-${item.key}`}>{item.label}{item.badge > 0 && <span className="flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-bold" style={{ background: "#DC2626", color: "#FFFFFF" }} data-testid="support-unread-badge">{item.badge}</span>}</button>)}</div>
 
-        {loading ? <div className="py-20 text-center"><div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-t-transparent" style={{ borderColor: `${c.BLUE}33`, borderTopColor: c.BLUE }} /></div> : tab === "stays" ? (
+        {tab === "support" ? <SupportChat /> : loading ? <div className="py-20 text-center"><div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-t-transparent" style={{ borderColor: `${c.BLUE}33`, borderTopColor: c.BLUE }} /></div> : tab === "stays" ? (
           bookings.length === 0 ? <EmptyState icon={CalendarDays} title="No stays yet" text="Find a furnished home and send your first request." c={c} /> : <div className="mt-10 space-y-10" data-testid="bookings-list">{bookings.map((booking) => <StayCard key={booking.id} booking={booking} c={c} />)}</div>
         ) : saved.length === 0 ? <EmptyState icon={Heart} title="Nothing saved yet" text="Tap the heart on any apartment to keep it here." c={c} /> : <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3" data-testid="saved-grid">{saved.map((apartment) => <ApartmentCard key={apartment.id} apartment={apartment} />)}</div>}
       </div>

@@ -494,3 +494,97 @@ def test_placeholder_unit_can_be_assigned_but_cannot_release_arrival_details():
         )
         assert arrival.status_code == 400
         assert "Verify the assigned unit's real number" in arrival.json()["detail"]
+
+
+def admin_headers(client):
+    login = client.post(
+        "/api/auth/login",
+        json={"email": "architecture-admin@example.com", "password": "architecture-admin-password"},
+    )
+    assert login.status_code == 200
+    return {"Authorization": f"Bearer {login.json()['access_token']}"}
+
+
+def test_support_thread_is_private_to_its_guest_and_reaches_the_admin_inbox():
+    with TestClient(server.app) as client:
+        alice = register_guest(client, "support-alice@example.com")
+        bob = register_guest(client, "support-bob@example.com")
+        alice_headers = {"Authorization": f"Bearer {alice['access_token']}"}
+        bob_headers = {"Authorization": f"Bearer {bob['access_token']}"}
+
+        sent = client.post("/api/support/messages", headers=alice_headers, json={"body": "  The key fob stopped working.  "})
+        assert sent.status_code == 200
+        assert sent.json()["body"] == "The key fob stopped working."
+        assert sent.json()["sender"] == "guest"
+
+        client.post("/api/support/messages", headers=bob_headers, json={"body": "Can I check in early?"})
+
+        # Each guest sees only their own thread.
+        alice_thread = client.get("/api/support/messages", headers=alice_headers).json()["messages"]
+        assert [m["body"] for m in alice_thread] == ["The key fob stopped working."]
+
+        # The admin sees both, each carrying one unread.
+        headers = admin_headers(client)
+        inbox = client.get("/api/admin/support/threads", headers=headers).json()
+        assert inbox["unread_total"] == 2
+        by_email = {row["user_email"]: row for row in inbox["threads"]}
+        assert by_email["support-alice@example.com"]["unread"] == 1
+        assert by_email["support-alice@example.com"]["last_message"] == "The key fob stopped working."
+
+        # Opening one thread clears only that guest's unread count.
+        alice_id = by_email["support-alice@example.com"]["user_id"]
+        opened = client.get(f"/api/admin/support/threads/{alice_id}", headers=headers)
+        assert opened.status_code == 200
+        assert [m["sender"] for m in opened.json()["messages"]] == ["guest"]
+        assert client.get("/api/admin/support/threads", headers=headers).json()["unread_total"] == 1
+
+        # The reply lands in that guest's thread, and nobody else's.
+        reply = client.post(f"/api/admin/support/threads/{alice_id}", headers=headers, json={"body": "A new fob is waiting at the desk."})
+        assert reply.status_code == 200
+        assert reply.json()["sender"] == "admin"
+
+        assert client.get("/api/support/unread", headers=alice_headers).json()["unread"] == 1
+        assert client.get("/api/support/unread", headers=bob_headers).json()["unread"] == 0
+
+        alice_thread = client.get("/api/support/messages", headers=alice_headers).json()["messages"]
+        assert [(m["sender"], m["body"]) for m in alice_thread] == [
+            ("guest", "The key fob stopped working."),
+            ("admin", "A new fob is waiting at the desk."),
+        ]
+        # Reading the thread clears the guest's own badge.
+        assert client.get("/api/support/unread", headers=alice_headers).json()["unread"] == 0
+
+        bob_thread = client.get("/api/support/messages", headers=bob_headers).json()["messages"]
+        assert [m["body"] for m in bob_thread] == ["Can I check in early?"]
+
+
+def test_support_endpoints_reject_anonymous_blank_and_non_admin_callers():
+    with TestClient(server.app) as client:
+        guest = register_guest(client, "support-guard@example.com")
+        guest_headers = {"Authorization": f"Bearer {guest['access_token']}"}
+
+        assert client.get("/api/support/messages").status_code == 401
+        assert client.post("/api/support/messages", json={"body": "hello"}).status_code == 401
+
+        # A guest cannot read the inbox or answer on behalf of support.
+        assert client.get("/api/admin/support/threads", headers=guest_headers).status_code == 403
+        assert client.post(
+            f"/api/admin/support/threads/{guest['user']['id']}",
+            headers=guest_headers,
+            json={"body": "approved"},
+        ).status_code == 403
+
+        # Whitespace-only passes the length check, so the strip guard rejects it.
+        blank = client.post("/api/support/messages", headers=guest_headers, json={"body": "   "})
+        assert blank.status_code == 400
+        assert blank.json()["detail"] == "Message cannot be empty"
+        # An entirely empty body is caught earlier, by validation.
+        assert client.post("/api/support/messages", headers=guest_headers, json={"body": ""}).status_code == 422
+
+        headers = admin_headers(client)
+        assert client.get("/api/admin/support/threads/does-not-exist", headers=headers).status_code == 404
+        assert client.post(
+            "/api/admin/support/threads/does-not-exist",
+            headers=headers,
+            json={"body": "hello"},
+        ).status_code == 404
