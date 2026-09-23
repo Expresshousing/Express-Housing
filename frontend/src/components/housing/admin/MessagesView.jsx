@@ -59,7 +59,6 @@ export default function MessagesView({ threads = [], onReload }) {
         subtitle={[thread.user_email, bookingLine(threads, thread.user_id)].filter(Boolean).join(" · ")}
         messages={thread.messages}
         mineSender="admin"
-        theirLabel={thread.user_name || "Guest"}
         loading={loading}
         emptyHint="Nothing here yet."
         onSend={reply}

@@ -70,13 +70,13 @@ export function useStickToBottom(ref, dependency) {
   }, [ref, dependency]);
 }
 
-function Bubble({ message, mineSender, theirLabel, colors, onOpenPhoto }) {
+function Bubble({ message, mineSender, colors, onOpenPhoto }) {
   const mine = message.sender === mineSender;
   const photos = message.attachments || [];
   return (
     <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
       <div
-        className="max-w-[min(680px,82%)] rounded-2xl px-5 py-4"
+        className="max-w-[min(620px,84%)] rounded-2xl px-3.5 py-2"
         style={mine ? { background: colors.BLUE, color: "#FFFFFF" } : { background: colors.CARD2, color: colors.TEXT }}
       >
         {photos.length > 0 && (
@@ -99,10 +99,10 @@ function Bubble({ message, mineSender, theirLabel, colors, onOpenPhoto }) {
             ))}
           </div>
         )}
-        {message.body && <p className="whitespace-pre-wrap text-[16px] leading-relaxed">{message.body}</p>}
-        <p className="mt-2 text-[12px]" style={{ opacity: 0.8 }}>
-          {mine ? "You" : theirLabel} · {chatTimestamp(message.created_at)}
-        </p>
+        {message.body && <p className="whitespace-pre-wrap text-[15px] leading-snug">{message.body}</p>}
+        {/* Which side the bubble sits on already says who wrote it, so the line
+            under each message is just the time. */}
+        <p className="mt-0.5 text-[10px] leading-none" style={{ opacity: 0.7 }}>{chatTimestamp(message.created_at)}</p>
       </div>
     </div>
   );
@@ -118,7 +118,6 @@ export function ChatWindow({
   subtitle,
   messages,
   mineSender,
-  theirLabel,
   loading = false,
   emptyHint,
   onSend,
@@ -236,8 +235,8 @@ export function ChatWindow({
           </button>
         </header>
 
-        <div ref={listRef} className="flex-1 space-y-4 overflow-y-auto px-6 py-6 md:px-10" data-testid="chat-messages">
-          <div className="space-y-4">
+        <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-3 md:px-6" data-testid="chat-messages">
+          <div className="space-y-2">
           {loading && <p className="text-center text-[15px]" style={{ color: c.MUTED }}>Loading…</p>}
           {!loading && messages.length === 0 && (
             <div className="flex flex-col items-center justify-center py-24 text-center">
@@ -249,19 +248,19 @@ export function ChatWindow({
             </div>
           )}
           {messages.map((message) => (
-            <Bubble key={message.id} message={message} mineSender={mineSender} theirLabel={theirLabel} colors={c} onOpenPhoto={setZoomed} />
+            <Bubble key={message.id} message={message} mineSender={mineSender} colors={c} onOpenPhoto={setZoomed} />
           ))}
         </div>
       </div>
 
 
-        <div className="border-t px-4 py-2.5 md:px-6" style={{ borderColor: c.BORDER, background: c.CARD }}>
+        <div className="border-t px-4 py-2 md:px-6" style={{ borderColor: c.BORDER, background: c.CARD }}>
           <div>
           {photos.length > 0 && (
             <div className="mb-2 flex flex-wrap gap-2" data-testid="chat-pending-photos">
               {photos.map((src, index) => (
                 <div key={index} className="relative">
-                  <img src={src} alt={`Attached ${index + 1}`} className="h-14 w-14 rounded-lg object-cover" />
+                  <img src={src} alt={`Attached ${index + 1}`} className="h-11 w-11 rounded-lg object-cover" />
                   <button
                     type="button"
                     onClick={() => setPhotos((current) => current.filter((_, i) => i !== index))}
@@ -281,35 +280,35 @@ export function ChatWindow({
           <textarea
             id="chat-input"
             className="input-eh"
-            rows={2}
+            rows={1}
             placeholder="Type your message…"
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
             onKeyDown={(event) => { if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) submit(); }}
-            style={{ fontSize: 16, paddingTop: 8, paddingBottom: 8, minHeight: 56 }}
+            style={{ fontSize: 16, paddingTop: 6, paddingBottom: 6, minHeight: 42 }}
             data-testid="chat-input"
           />
 
-          <div className="mt-2 flex items-center justify-between gap-2">
+          <div className="mt-1.5 flex items-center justify-between gap-2">
             <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={addPhotos} data-testid="chat-file-input" />
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={preparing || photos.length >= MAX_ATTACHMENTS}
-              className="flex min-h-11 items-center gap-2 rounded-full border px-4 text-[14px] font-bold"
+              className="flex min-h-9 items-center gap-1.5 rounded-full border px-3 text-[13px] font-bold"
               style={{ borderColor: c.BORDER, color: c.TEXT }}
               data-testid="chat-add-photo"
             >
-              <ImagePlus size={18} /> {preparing ? "Adding…" : "Add photo"}
+              <ImagePlus size={16} /> {preparing ? "Adding…" : "Add photo"}
             </button>
             <button
               type="button"
-              style={primaryButtonStyle(c, { padding: "0 18px" })}
+              style={{ ...primaryButtonStyle(c, { padding: "0 14px" }), minHeight: 36, fontSize: 13, boxShadow: "none" }}
               onClick={submit}
               disabled={sending || (!draft.trim() && !photos.length)}
               data-testid="chat-send"
             >
-              <span className="flex items-center gap-2 text-[14px]"><Send size={17} />{sending ? "Sending…" : "Send"}</span>
+              <span className="flex items-center gap-1.5 text-[13px]"><Send size={15} />{sending ? "Sending…" : "Send"}</span>
             </button>
           </div>
           </div>
@@ -374,7 +373,6 @@ export default function SupportChat({ onClose }) {
       subtitle="Access, maintenance, dates or checkout. Photos welcome."
       messages={messages}
       mineSender="guest"
-      theirLabel="Express Housing"
       loading={loading}
       emptyHint="Send the first message below. You can attach a photo if something needs fixing."
       onSend={send}
