@@ -70,7 +70,7 @@ export function useStickToBottom(ref, dependency) {
   }, [ref, dependency]);
 }
 
-function Bubble({ message, mineSender, theirLabel, colors }) {
+function Bubble({ message, mineSender, theirLabel, colors, onOpenPhoto }) {
   const mine = message.sender === mineSender;
   const photos = message.attachments || [];
   return (
@@ -82,14 +82,20 @@ function Bubble({ message, mineSender, theirLabel, colors }) {
         {photos.length > 0 && (
           <div className={`mb-2 grid gap-2 ${photos.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
             {photos.map((src, index) => (
-              <a key={index} href={src} target="_blank" rel="noreferrer" aria-label={`Open photo ${index + 1} full size`}>
+              <button
+                key={index}
+                type="button"
+                onClick={() => onOpenPhoto(src)}
+                aria-label={`Open photo ${index + 1} full size`}
+                className="block w-full"
+              >
                 <img
                   src={src}
                   alt={`Shared photo ${index + 1}`}
                   className="w-full cursor-zoom-in rounded-xl object-cover"
                   style={{ maxHeight: photos.length > 1 ? 180 : 320 }}
                 />
-              </a>
+              </button>
             ))}
           </div>
         )}
@@ -123,6 +129,7 @@ export function ChatWindow({
   const [photos, setPhotos] = useState([]);
   const [sending, setSending] = useState(false);
   const [preparing, setPreparing] = useState(false);
+  const [zoomed, setZoomed] = useState(null);
   const listRef = useRef(null);
   const fileRef = useRef(null);
 
@@ -130,7 +137,15 @@ export function ChatWindow({
 
   // Escape closes, and the page behind must not scroll while this is open.
   useEffect(() => {
-    const onKey = (event) => { if (event.key === "Escape") onClose(); };
+    const onKey = (event) => {
+      if (event.key !== "Escape") return;
+      // Escape backs out one layer at a time: the photo first, then the chat.
+      setZoomed((current) => {
+        if (current) return null;
+        onClose();
+        return null;
+      });
+    };
     document.addEventListener("keydown", onKey);
     const previous = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -209,10 +224,26 @@ export function ChatWindow({
             </div>
           )}
           {messages.map((message) => (
-            <Bubble key={message.id} message={message} mineSender={mineSender} theirLabel={theirLabel} colors={c} />
+            <Bubble key={message.id} message={message} mineSender={mineSender} theirLabel={theirLabel} colors={c} onOpenPhoto={setZoomed} />
           ))}
         </div>
       </div>
+
+      {zoomed && (
+        <div className="fixed inset-0 z-[210] flex items-center justify-center bg-black/90 p-4" role="dialog" aria-modal="true" aria-label="Photo">
+          <button type="button" className="absolute inset-0" onClick={() => setZoomed(null)} aria-label="Close photo" />
+          <img src={zoomed} alt="Shared photo, full size" className="relative max-h-full max-w-full rounded-xl object-contain" />
+          <button
+            type="button"
+            onClick={() => setZoomed(null)}
+            className="absolute right-4 top-4 flex items-center gap-2 rounded-full px-4 py-3 text-[15px] font-bold"
+            style={{ background: "#FFFFFF", color: "#111111" }}
+            data-testid="photo-close"
+          >
+            <X size={20} /> Close
+          </button>
+        </div>
+      )}
 
       <div className="border-t px-5 py-4 md:px-8" style={{ borderColor: c.BORDER, background: c.CARD }}>
         <div className="mx-auto w-full max-w-4xl">

@@ -622,6 +622,24 @@ def test_support_message_carries_photos_and_rejects_non_image_or_oversized_ones(
             "/api/support/messages", headers=headers,
             json={"body": "", "attachments": ["data:application/pdf;base64,AAAA"]},
         ).status_code == 422
+        # SVG is a scripting format, and the operator is the one who opens these.
+        svg = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxzY3JpcHQ+YWxlcnQoMSk8L3NjcmlwdD48L3N2Zz4="
+        assert client.post("/api/support/messages", headers=headers, json={"body": "", "attachments": [svg]}).status_code == 422
+        assert client.post(
+            "/api/support/messages", headers=headers,
+            json={"body": "", "attachments": ["data:image/svg+xml,<svg onload=alert(1)>"]},
+        ).status_code == 422
+        # A raw (non-base64) data URI is refused even for an allowed type.
+        assert client.post(
+            "/api/support/messages", headers=headers,
+            json={"body": "", "attachments": ["data:image/png,notbase64"]},
+        ).status_code == 422
+        # The operator's own reply path enforces the same rule.
+        assert client.post(
+            f"/api/admin/support/threads/{guest['user']['id']}",
+            headers=admin_headers(client),
+            json={"body": "", "attachments": [svg]},
+        ).status_code == 422
         assert client.post(
             "/api/support/messages", headers=headers,
             json={"body": "", "attachments": ["data:image/png;base64," + "A" * 2_000_001]},
