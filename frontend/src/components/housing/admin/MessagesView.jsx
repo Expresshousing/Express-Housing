@@ -6,6 +6,12 @@ import { useTheme } from "@/context/ThemeContext";
 import { ChatWindow, chatTimestamp } from "../SupportChat";
 import { apiErrorMessage } from "./adminUtils";
 
+function bookingLine(threads, userId) {
+  const booking = threads.find((row) => row.user_id === userId)?.booking;
+  if (!booking?.apartment_title) return "";
+  return `${booking.apartment_title} · ${booking.check_in} → ${booking.check_out}`;
+}
+
 export default function MessagesView({ threads = [], onReload }) {
   const { colors: c } = useTheme();
   const [openId, setOpenId] = useState(null);
@@ -48,8 +54,9 @@ export default function MessagesView({ threads = [], onReload }) {
   if (openId && thread) {
     return (
       <ChatWindow
+        eyebrow="Messages"
         title={thread.user_name || thread.user_email}
-        subtitle={thread.user_email}
+        subtitle={[thread.user_email, bookingLine(threads, thread.user_id)].filter(Boolean).join(" · ")}
         messages={thread.messages}
         mineSender="admin"
         theirLabel={thread.user_name || "Guest"}

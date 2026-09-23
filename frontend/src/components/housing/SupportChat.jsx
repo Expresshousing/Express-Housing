@@ -113,6 +113,7 @@ function Bubble({ message, mineSender, theirLabel, colors, onOpenPhoto }) {
  * it, so the two stay identical in behaviour and only differ in their labels.
  */
 export function ChatWindow({
+  eyebrow = "Express Housing",
   title,
   subtitle,
   messages,
@@ -124,7 +125,7 @@ export function ChatWindow({
   onClose,
   closeLabel = "Close",
 }) {
-  const { colors: c } = useTheme();
+  const { colors: c, isDarkMode } = useTheme();
   const [draft, setDraft] = useState("");
   const [photos, setPhotos] = useState([]);
   const [sending, setSending] = useState(false);
@@ -194,25 +195,52 @@ export function ChatWindow({
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex flex-col" style={{ background: c.BG }} role="dialog" aria-modal="true" aria-label={title}>
-      <header className="flex items-start justify-between gap-4 border-b px-5 py-4 md:px-8" style={{ borderColor: c.BORDER }}>
-        <div className="min-w-0">
-          <h2 className="truncate text-[22px] font-extrabold leading-tight md:text-[28px]">{title}</h2>
-          {subtitle && <p className="mt-1 truncate text-[14px]" style={{ color: c.MUTED }}>{subtitle}</p>}
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="flex shrink-0 items-center gap-2 rounded-full border px-4 py-3 text-[15px] font-bold"
-          style={{ borderColor: c.BORDER, color: c.TEXT }}
-          data-testid="chat-close"
-        >
-          <X size={20} /> {closeLabel}
-        </button>
-      </header>
+    <div className="fixed inset-0 z-[200] flex justify-end" role="dialog" aria-modal="true" aria-label={title}>
+      {/* The page stays visible but washed out behind the sheet, so it is clear
+          this sits on top of the portal rather than replacing it. */}
+      <button
+        type="button"
+        className="eh-scrim absolute inset-0"
+        style={{ background: isDarkMode ? "rgba(0,0,0,0.62)" : "rgba(255,255,255,0.74)", backdropFilter: "blur(2px)" }}
+        onClick={onClose}
+        aria-label={closeLabel}
+      />
 
-      <div ref={listRef} className="flex-1 space-y-4 overflow-y-auto px-5 py-6 md:px-8" data-testid="chat-messages">
-        <div className="mx-auto w-full max-w-4xl space-y-4">
+      <section
+        className="eh-sheet relative flex h-full w-full flex-col border-l"
+        style={{
+          background: c.BG,
+          borderColor: c.BORDER,
+          maxWidth: 1180,
+          boxShadow: isDarkMode ? "none" : "-24px 0 70px rgba(0,0,0,0.16)",
+        }}
+      >
+        <header className="flex items-start justify-between gap-4 px-6 pb-6 pt-7 md:px-10 md:pt-9">
+          <div className="min-w-0">
+            <div className="flex items-center gap-3">
+              <span className="h-0.5 w-8 shrink-0" style={{ background: c.BLUE }} aria-hidden="true" />
+              <p className="truncate text-[11px] font-bold uppercase tracking-[0.24em]" style={{ color: c.BLUE }}>{eyebrow}</p>
+            </div>
+            <h2 className="mt-4 truncate text-[34px] font-extrabold leading-none md:text-[46px]">{title}</h2>
+            {subtitle && <p className="mt-3 max-w-2xl text-[15px] leading-relaxed" style={{ color: c.MUTED }}>{subtitle}</p>}
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-opacity hover:opacity-70"
+            style={{ background: c.CARD2, color: c.TEXT }}
+            title={closeLabel}
+            aria-label={closeLabel}
+            data-testid="chat-close"
+          >
+            <X size={22} />
+          </button>
+        </header>
+
+        <div className="border-b" style={{ borderColor: c.BORDER }} />
+
+        <div ref={listRef} className="flex-1 space-y-4 overflow-y-auto px-6 py-6 md:px-10" data-testid="chat-messages">
+          <div className="space-y-4">
           {loading && <p className="text-center text-[15px]" style={{ color: c.MUTED }}>Loading…</p>}
           {!loading && messages.length === 0 && (
             <div className="flex flex-col items-center justify-center py-24 text-center">
@@ -229,24 +257,9 @@ export function ChatWindow({
         </div>
       </div>
 
-      {zoomed && (
-        <div className="fixed inset-0 z-[210] flex items-center justify-center bg-black/90 p-4" role="dialog" aria-modal="true" aria-label="Photo">
-          <button type="button" className="absolute inset-0" onClick={() => setZoomed(null)} aria-label="Close photo" />
-          <img src={zoomed} alt="Shared photo, full size" className="relative max-h-full max-w-full rounded-xl object-contain" />
-          <button
-            type="button"
-            onClick={() => setZoomed(null)}
-            className="absolute right-4 top-4 flex items-center gap-2 rounded-full px-4 py-3 text-[15px] font-bold"
-            style={{ background: "#FFFFFF", color: "#111111" }}
-            data-testid="photo-close"
-          >
-            <X size={20} /> Close
-          </button>
-        </div>
-      )}
 
-      <div className="border-t px-5 py-4 md:px-8" style={{ borderColor: c.BORDER, background: c.CARD }}>
-        <div className="mx-auto w-full max-w-4xl">
+        <div className="border-t px-6 py-4 md:px-10" style={{ borderColor: c.BORDER, background: c.CARD }}>
+          <div>
           {photos.length > 0 && (
             <div className="mb-3 flex flex-wrap gap-2" data-testid="chat-pending-photos">
               {photos.map((src, index) => (
@@ -301,8 +314,25 @@ export function ChatWindow({
               <span className="flex items-center gap-2 text-[15px]"><Send size={18} />{sending ? "Sending…" : "Send"}</span>
             </button>
           </div>
+          </div>
         </div>
-      </div>
+      </section>
+
+      {zoomed && (
+        <div className="fixed inset-0 z-[210] flex items-center justify-center bg-black/90 p-4" role="dialog" aria-modal="true" aria-label="Photo">
+          <button type="button" className="absolute inset-0" onClick={() => setZoomed(null)} aria-label="Close photo" />
+          <img src={zoomed} alt="Shared photo, full size" className="relative max-h-full max-w-full rounded-xl object-contain" />
+          <button
+            type="button"
+            onClick={() => setZoomed(null)}
+            className="absolute right-4 top-4 flex items-center gap-2 rounded-full px-4 py-3 text-[15px] font-bold"
+            style={{ background: "#FFFFFF", color: "#111111" }}
+            data-testid="photo-close"
+          >
+            <X size={20} /> Close
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -341,8 +371,9 @@ export default function SupportChat({ onClose }) {
 
   return (
     <ChatWindow
-      title="Message the Express Housing team"
-      subtitle="Anything about your stay — access, maintenance, dates, checkout. We reply here."
+      eyebrow="Express Housing"
+      title="Support"
+      subtitle="Message the team about anything to do with your stay — access, maintenance, dates or checkout. Add a photo if something needs fixing."
       messages={messages}
       mineSender="guest"
       theirLabel="Express Housing"
