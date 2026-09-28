@@ -686,14 +686,19 @@ def test_public_listings_never_name_the_building_or_its_address():
         for field in server.PRIVATE_LISTING_FIELDS:
             assert field not in detail, f"{field} leaked in the listing detail"
 
-        # Titles name an area, never a building.
+        # No building name anywhere in what a guest receives — not in the
+        # title, and not buried in prose such as the description, which is
+        # where it survived the first pass.
+        import json as _json
+
         buildings = {b["name"] for b in client.get("/api/admin/portfolio", headers=headers).json()["buildings"]}
         assert buildings, "expected seeded buildings"
         for listing in listings:
             if not listing.get("portfolio_seed"):
                 continue
+            blob = _json.dumps(listing)
             for name in buildings:
-                assert name not in listing["title"], f"{name} named in title {listing['title']!r}"
+                assert name not in blob, f"{name!r} reaches guests in {listing['title']!r}"
 
         # The public buildings endpoint withholds the same three facts.
         for building in client.get("/api/buildings").json():
