@@ -11,7 +11,7 @@ const FAQ_CATEGORIES = [
     items: [
       {
         question: "What homes can I book with Express Housing?",
-        answer: "Our current Philadelphia collection includes furnished one- and two-bedroom homes at Broad + Noble, The Hannah, Edgewater II, and 1500 Locust. New cities and partner buildings can be added as the portfolio grows.",
+        answer: "Our current Philadelphia collection includes furnished one- and two-bedroom homes in Callowhill, on the North Broad corridor, in Logan Square, and in Rittenhouse Square. We share the exact address once a reservation is confirmed. New neighbourhoods can be added as the portfolio grows.",
       },
       {
         question: "How do I check availability?",

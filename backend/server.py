@@ -496,24 +496,33 @@ async def root():
     return {"message": "Express Housing - Flexible Furnished Stays API"}
 
 
+# Which building a stay sits in, its street address and its own website are
+# operator facts, not guest facts: publishing them invites a guest to book the
+# building directly and exposes an address that should only follow a confirmed
+# reservation. They stay in the database for operations and reach the admin and
+# partner views; the public endpoints below drop them.
+PRIVATE_LISTING_FIELDS = ("building_name", "address", "official_website", "amenities_source")
+
+
+def public_listing(listing: dict) -> dict:
+    return {key: value for key, value in listing.items() if key not in PRIVATE_LISTING_FIELDS}
+
+
 @api_router.get("/buildings")
 async def get_buildings():
-    """Public building facts. Compliance status, partner authorization, and
-    unit data never leave this endpoint."""
+    """Public building facts. The name, street address and building website are
+    withheld here, as are compliance status, partner authorization and units."""
     projection = {
         "_id": 0,
         "id": 1,
         "slug": 1,
-        "name": 1,
-        "address": 1,
         "neighborhood": 1,
         "city": 1,
         "state": 1,
-        "website": 1,
         "images": 1,
         "amenities": 1,
     }
-    return await db.buildings.find({}, projection).sort([("name", 1)]).to_list(100)
+    return await db.buildings.find({}, projection).sort([("neighborhood", 1)]).to_list(100)
 
 
 @api_router.post("/quotes")
@@ -652,14 +661,14 @@ async def get_apartments(
     if sort in sort_map:
         cursor = cursor.sort([sort_map[sort]])
     apartments = await cursor.to_list(200)
-    return apartments
+    return [public_listing(apartment) for apartment in apartments]
 
 @api_router.get("/apartments/{apartment_id}")
 async def get_apartment(apartment_id: str):
     apt = await db.apartments.find_one({"id": apartment_id}, {"_id": 0})
     if not apt:
         raise HTTPException(status_code=404, detail="Apartment not found")
-    return apt
+    return public_listing(apt)
 
 @api_router.get("/neighborhoods")
 async def get_neighborhoods():
@@ -843,7 +852,7 @@ async def get_wishlist(user: dict = Depends(get_current_user)):
     items = await db.wishlist.find({"user_id": user["id"]}, {"_id": 0}).to_list(200)
     apt_ids = [i["apartment_id"] for i in items]
     apartments = await db.apartments.find({"id": {"$in": apt_ids}}, {"_id": 0}).to_list(200)
-    return apartments
+    return [public_listing(apartment) for apartment in apartments]
 
 @api_router.post("/wishlist/{apartment_id}")
 async def toggle_wishlist(apartment_id: str, user: dict = Depends(get_current_user)):

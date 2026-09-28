@@ -30,27 +30,30 @@ const STAY_STORIES = [
   },
 ];
 
-const PORTFOLIO_BUILDINGS = [
+// Cards are labelled by area, not by building: which property a stay sits in
+// is an operator fact, so `area` matches the listing's public_area and is what
+// pairs a card with its listings.
+const PORTFOLIO_AREAS = [
   {
-    name: "Broad + Noble",
+    area: "North Broad",
     neighborhood: "Callowhill",
     image: "/images/operator-portfolio/broad-noble-private-terrace.jpg",
     imagePosition: "center 52%",
   },
   {
-    name: "The Hannah",
+    area: "Callowhill",
     neighborhood: "Callowhill",
     image: "/images/operator-portfolio/the-hannah-entrance.jpg",
     imagePosition: "center center",
   },
   {
-    name: "Edgewater II",
+    area: "Logan Square",
     neighborhood: "Logan Square",
     image: "/images/buildings/edgewater-2/model-interior.jpg",
     imagePosition: "center center",
   },
   {
-    name: "1500 Locust",
+    area: "Rittenhouse Square",
     neighborhood: "Rittenhouse Square",
     image: "/images/operator-portfolio/center-city-rooftop.webp",
     imagePosition: "center 43%",
@@ -118,8 +121,8 @@ export default function HomePage() {
     return () => { if (scrollTimer) window.clearTimeout(scrollTimer); };
   }, [location.hash]);
 
-  const buildingCards = useMemo(() => PORTFOLIO_BUILDINGS.map((building) => {
-    const listings = apartments.filter((apartment) => apartment.building_name === building.name);
+  const buildingCards = useMemo(() => PORTFOLIO_AREAS.map((building) => {
+    const listings = apartments.filter((apartment) => (apartment.public_area || apartment.neighborhood) === building.area);
     return {
       ...building,
       image: listings[0]?.images?.[0] || building.image,
@@ -151,22 +154,22 @@ export default function HomePage() {
           <div className="grid grid-cols-1 gap-x-5 gap-y-14 md:grid-cols-12 md:gap-y-20" data-testid="new-listings-grid">
             {buildingCards.map((building, index) => (
               <motion.article
-                key={building.name}
+                key={building.area}
                 className={`${index % 2 === 0 ? "md:col-span-7" : "md:col-span-5"} ${index === 1 || index === 2 ? "md:mt-12" : ""}`}
                 initial={{ opacity: 0, y: 32 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-10%" }}
                 transition={{ duration: 0.7, delay: (index % 4) * 0.08, ease: [0.16, 1, 0.3, 1] }}
               >
-                <Link to={building.listingId ? `/apartments/${building.listingId}` : `/?building=${encodeURIComponent(building.name)}#stay-planner`} className="group block" aria-label={`View furnished apartments at ${building.name}`}>
+                <Link to={building.listingId ? `/apartments/${building.listingId}` : `/?area=${encodeURIComponent(building.area)}#stay-planner`} className="group block" aria-label={`View furnished apartments in ${building.area}`}>
                   <div className={`relative overflow-hidden rounded-[18px] ${index % 2 === 0 ? "aspect-[4/3]" : "aspect-[5/4]"}`}>
-                    <img src={building.image} alt={`${building.name} official building or model-home view`} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" style={{ objectPosition: building.imagePosition }} loading="lazy" decoding="async" />
+                    <img src={building.image} alt={`A furnished Express Housing home in ${building.area}`} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" style={{ objectPosition: building.imagePosition }} loading="lazy" decoding="async" />
                     <span className="absolute left-5 top-5 flex h-9 min-w-9 items-center justify-center rounded-full bg-white px-3 text-[10px] font-extrabold text-black">0{index + 1}</span>
                   </div>
                   <div className="mt-5 flex items-end justify-between gap-5 border-t pt-5" style={{ borderColor: c.BORDER }}>
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: c.MUTED }}>{building.neighborhood} · Philadelphia</p>
-                      <h3 className="mt-2 text-[25px] font-extrabold leading-none tracking-[-0.035em] sm:text-[30px]">{building.name}</h3>
+                      <h3 className="mt-2 text-[25px] font-extrabold leading-none tracking-[-0.035em] sm:text-[30px]">{building.area}</h3>
                       <p className="mt-2 text-[12px] font-semibold" style={{ color: c.MUTED }}>Furnished one- and two-bedroom homes</p>
                     </div>
                     <span className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border transition-colors group-hover:text-white" style={{ borderColor: c.BORDER }}>
@@ -200,7 +203,7 @@ export default function HomePage() {
           <motion.div className="grid gap-4 lg:grid-cols-[1.45fr_0.55fr]" initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-10%" }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}>
             <figure>
               <div className="relative aspect-[4/3] overflow-hidden rounded-[18px] lg:aspect-[16/11]"><img src="/images/operator-portfolio/broad-noble-private-terrace.jpg" alt="Private terrace at a Philadelphia Express Housing building" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: "center 52%" }} loading="lazy" decoding="async" /></div>
-              <figcaption className="mt-3 text-[10px] font-bold uppercase tracking-[0.16em] text-black/45">Space beyond the apartment · Broad + Noble</figcaption>
+              <figcaption className="mt-3 text-[10px] font-bold uppercase tracking-[0.16em] text-black/45">Space beyond the apartment · North Broad</figcaption>
             </figure>
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-1">
               <figure><div className="relative aspect-square overflow-hidden rounded-[18px]"><img src="/images/operator-portfolio/broad-noble-gym.jpg" alt="Fitness studio at Broad and Noble" className="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" /></div><figcaption className="mt-3 text-[10px] font-bold uppercase tracking-[0.16em] text-black/45">Fitness</figcaption></figure>
@@ -283,10 +286,10 @@ export default function HomePage() {
           transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
         >
           <div className="relative aspect-[4/3] overflow-hidden rounded-[20px] sm:aspect-[16/10] lg:aspect-[16/8]">
-            <img src="/images/buildings/the-hannah/model-one-bedroom.jpg" alt="Furnished one-bedroom residence at The Hannah in Philadelphia" className="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />
+            <img src="/images/buildings/the-hannah/model-one-bedroom.jpg" alt="Furnished one-bedroom residence in Callowhill, Philadelphia" className="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />
             <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/70 to-transparent" aria-hidden="true" />
             <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-6 p-5 text-white sm:p-8">
-              <div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">The Hannah · Callowhill</p><p className="mt-2 text-[18px] font-extrabold sm:text-[24px]">A real home, ready on arrival.</p></div>
+              <div><p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">Callowhill · Philadelphia</p><p className="mt-2 text-[18px] font-extrabold sm:text-[24px]">A real home, ready on arrival.</p></div>
               <Link to="/#stay-planner" className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-black sm:flex" aria-label="Explore available homes"><ArrowUpRight size={18} /></Link>
             </div>
           </div>

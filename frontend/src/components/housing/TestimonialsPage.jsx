@@ -15,7 +15,7 @@ const STORIES = [
   {
     quote: "I relocated for a six-month assignment and didn't want a hotel or a full lease. The arrival page had my unit number and Door access ready before I landed—nothing to chase down at 9pm.",
     voice: "Corporate relocation, six-month stay",
-    context: "Broad + Noble · Callowhill",
+    context: "North Broad · Callowhill",
     category: "Relocation",
   },
   {
@@ -27,13 +27,13 @@ const STORIES = [
   {
     quote: "My father needed to be close to the hospital for three weeks. The building was quiet, the kitchen meant we weren't eating out for every meal, and everything about entry was explained clearly in advance.",
     voice: "Family caregiver stay",
-    context: "1500 Locust · Rittenhouse Square",
+    context: "Rittenhouse Square",
     category: "Family stay",
   },
   {
     quote: "Extended business travel usually means a soulless corporate suite. This felt like an actual apartment—and support answered the same day when our dates needed to shift.",
     voice: "Extended business traveler",
-    context: "The Hannah · Callowhill",
+    context: "Callowhill",
     category: "Business travel",
   },
   {
