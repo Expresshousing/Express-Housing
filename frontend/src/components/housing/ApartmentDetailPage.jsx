@@ -474,7 +474,7 @@ export default function ApartmentDetailPage() {
             </div>
           </DetailSection>
 
-          <DetailSection id="location-context" eyebrow="Philadelphia" title="Where you'll be" description="The building location is public for planning. The assigned unit number and private entry instructions remain protected until the reservation is confirmed and ready." c={c}>
+          <DetailSection id="location-context" eyebrow="Philadelphia" title="Where you'll be" description="The neighbourhood is shown so you can plan around it. The exact address, unit number and entry instructions follow once your reservation is confirmed." c={c}>
             <div className="overflow-hidden" style={cardStyle(c, isDarkMode, { padding: 0, radius: 16 })}>
               <div className="flex min-h-48 items-center justify-center p-6" style={{ background: c.CARD2 }}>
                 <div className="max-w-md text-center">

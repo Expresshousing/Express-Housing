@@ -399,8 +399,9 @@ def build_portfolio():
                     "parking_monthly": 300,
                     "tax_rate_short_stay": 0.155,
                     "description": (
-                        f"A furnished {bedroom_word.lower()} stay at {raw['name']}. "
-                        "Exact layout, view, finishes and unit number are confirmed for the assigned home."
+                        f"A furnished {bedroom_word.lower()} stay in {raw['public_area']}, Philadelphia. "
+                        "Exact layout, view, finishes and unit number are confirmed for the assigned home, "
+                        "and the full address follows once your reservation is confirmed."
                     ),
                     "amenities": raw["amenities"],
                     "images": [image["url"] for image in BUILDING_IMAGES[raw["slug"]]],
