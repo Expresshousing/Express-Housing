@@ -7,9 +7,9 @@ import { useTheme } from "@/context/ThemeContext";
 import { pageStyle } from "@/lib/designSystem";
 
 const PHILADELPHIA_NEIGHBORHOODS = [
-  { name: "Callowhill", buildings: "Broad + Noble · The Hannah", image: "/images/operator-portfolio/broad-noble-private-terrace.jpg", position: "center 52%" },
-  { name: "Logan Square", buildings: "Edgewater II", image: "/images/buildings/edgewater-2/model-interior.jpg", position: "center center" },
-  { name: "Rittenhouse Square", buildings: "1500 Locust", image: "/images/operator-portfolio/center-city-rooftop.webp", position: "center 43%" },
+  { name: "Callowhill", buildings: "Two addresses · furnished 1 and 2 bedrooms", image: "/images/operator-portfolio/broad-noble-private-terrace.jpg", position: "center 52%" },
+  { name: "Logan Square", buildings: "Riverfront address · furnished 1 and 2 bedrooms", image: "/images/buildings/edgewater-2/model-interior.jpg", position: "center center" },
+  { name: "Rittenhouse Square", buildings: "Centre-city address · furnished 1 and 2 bedrooms", image: "/images/operator-portfolio/center-city-rooftop.webp", position: "center 43%" },
 ];
 
 const NEXT_CITIES = [

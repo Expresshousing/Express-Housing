@@ -664,3 +664,42 @@ def test_support_message_carries_photos_and_rejects_non_image_or_oversized_ones(
         refreshed = client.get("/api/admin/support/threads", headers=headers_admin).json()
         row = next(r for r in refreshed["threads"] if r["user_email"] == "support-photos@example.com")
         assert row["last_message"] == "1 photo"
+
+
+def test_public_listings_never_name_the_building_or_its_address():
+    with TestClient(server.app) as client:
+        headers = admin_headers(client)
+        assert client.post("/api/seed", headers=headers).status_code == 200
+
+        listings = client.get("/api/apartments").json()
+        assert listings
+        for listing in listings:
+            for field in server.PRIVATE_LISTING_FIELDS:
+                assert field not in listing, f"{field} leaked in /apartments"
+            # What a guest does get is where the home is, not which one it is.
+            assert listing["neighborhood"]
+            assert listing["city"]
+            assert listing["building_id"]
+
+        portfolio_listing = next(l for l in listings if l.get("portfolio_seed"))
+        detail = client.get(f"/api/apartments/{portfolio_listing['id']}").json()
+        for field in server.PRIVATE_LISTING_FIELDS:
+            assert field not in detail, f"{field} leaked in the listing detail"
+
+        # Titles name an area, never a building.
+        buildings = {b["name"] for b in client.get("/api/admin/portfolio", headers=headers).json()["buildings"]}
+        assert buildings, "expected seeded buildings"
+        for listing in listings:
+            if not listing.get("portfolio_seed"):
+                continue
+            for name in buildings:
+                assert name not in listing["title"], f"{name} named in title {listing['title']!r}"
+
+        # The public buildings endpoint withholds the same three facts.
+        for building in client.get("/api/buildings").json():
+            for field in ("name", "address", "website"):
+                assert field not in building, f"{field} leaked in /buildings"
+
+        # Operations still see everything they need.
+        admin_buildings = client.get("/api/admin/portfolio", headers=headers).json()["buildings"]
+        assert all(b.get("name") and b.get("address") for b in admin_buildings)

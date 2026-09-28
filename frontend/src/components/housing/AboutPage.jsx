@@ -18,7 +18,7 @@ const JOURNEY = [
   { label: "Arrive", title: "Find every private detail in one place.", text: "Your secure portal brings together entry instructions, access video, Wi-Fi, building guidance, support, and checkout." },
 ];
 
-const BUILDINGS = ["Broad + Noble", "The Hannah", "Edgewater II", "1500 Locust"];
+const AREAS = ["North Broad, Callowhill", "Callowhill", "Logan Square", "Rittenhouse Square"];
 
 const reveal = { initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: "-12%" }, transition: { duration: 0.65, ease: [0.16, 1, 0.3, 1] } };
 
@@ -60,7 +60,7 @@ export default function AboutPage() {
       </section>
 
       <section className="eh-container py-20 md:py-32">
-        <div className="grid gap-12 lg:grid-cols-[1fr_1fr] lg:items-end"><motion.div {...reveal}><div className="flex items-center gap-3"><Building2 size={20} color={c.BLUE} /><p className="text-[11px] font-bold uppercase tracking-[0.25em]" style={{ color: c.BLUE }}>Philadelphia collection</p></div><h2 className="mt-6 max-w-xl text-[42px] font-extrabold leading-[0.96] tracking-[-0.04em] md:text-[64px]">Four buildings.<br />One clear standard.</h2></motion.div><motion.div {...reveal} className="border-t" style={{ borderColor: c.BORDER }}>{BUILDINGS.map((building) => <div key={building} className="flex items-center gap-3 border-b py-4 text-[15px] font-bold" style={{ borderColor: c.BORDER }}><Check size={16} color={c.BLUE} /> {building}</div>)}</motion.div></div>
+        <div className="grid gap-12 lg:grid-cols-[1fr_1fr] lg:items-end"><motion.div {...reveal}><div className="flex items-center gap-3"><Building2 size={20} color={c.BLUE} /><p className="text-[11px] font-bold uppercase tracking-[0.25em]" style={{ color: c.BLUE }}>Philadelphia collection</p></div><h2 className="mt-6 max-w-xl text-[42px] font-extrabold leading-[0.96] tracking-[-0.04em] md:text-[64px]">Four addresses.<br />One clear standard.</h2></motion.div><motion.div {...reveal} className="border-t" style={{ borderColor: c.BORDER }}>{AREAS.map((building) => <div key={building} className="flex items-center gap-3 border-b py-4 text-[15px] font-bold" style={{ borderColor: c.BORDER }}><Check size={16} color={c.BLUE} /> {building}</div>)}</motion.div></div>
         <p className="mt-8 max-w-2xl text-[12px] leading-relaxed" style={{ color: c.MUTED }}>Listings use authorized building, amenity, or model-home photography. Exact unit layout, furniture, view, and finishes are confirmed for the assigned home.</p>
 
         <motion.div {...reveal} className="mt-20 grid overflow-hidden rounded-[22px] md:grid-cols-[1fr_auto]" style={{ background: c.TEXT, color: c.BG }}><div className="p-8 md:p-12"><div className="flex items-center gap-3"><KeyRound size={20} /><p className="text-[10px] font-bold uppercase tracking-[0.2em]">Ready when you are</p></div><h2 className="mt-5 max-w-2xl text-[34px] font-extrabold leading-[0.98] tracking-[-0.035em] md:text-[50px]">Find the Philadelphia home that fits your stay.</h2></div><div className="flex items-end p-8 pt-0 md:p-12"><Link to="/#stay-planner" className="inline-flex min-h-12 items-center gap-2 rounded-full px-6 text-[14px] font-bold text-white" style={{ background: c.BLUE }}>View available homes <ArrowRight size={16} /></Link></div></motion.div>

@@ -43,7 +43,7 @@ export default function ApartmentCard({ apartment }) {
     >
       <div className="relative aspect-[4/3] overflow-hidden" style={{ background: c.CARD2 }} onMouseEnter={() => apartment.images?.length > 1 && setImgIdx(1)} onMouseLeave={() => setImgIdx(0)}>
         {apartment.images?.length ? <img src={apartment.images[imgIdx] || apartment.images[0]} alt={apartment.title} className="h-full w-full object-cover group-hover:scale-[1.02]" style={{ transition: "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)" }} loading="lazy" /> : (
-          <div className="flex h-full w-full flex-col items-center justify-center p-8 text-center" style={{ background: c.CARD2, color: c.TEXT }}><p className="text-[11px] font-semibold" style={{ color: c.MUTED }}>Philadelphia</p><p className="mt-2 text-[20px] font-bold">{apartment.building_name}</p><p className="mt-3 text-[13px]" style={{ color: c.MUTED }}>Verified unit photography coming soon</p></div>
+          <div className="flex h-full w-full flex-col items-center justify-center p-8 text-center" style={{ background: c.CARD2, color: c.TEXT }}><p className="text-[11px] font-semibold" style={{ color: c.MUTED }}>Philadelphia</p><p className="mt-2 text-[20px] font-bold">{apartment.public_area || apartment.neighborhood}</p><p className="mt-3 text-[13px]" style={{ color: c.MUTED }}>Verified unit photography coming soon</p></div>
         )}
         <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
           {apartment.is_new && <span style={microBadgeStyle(c.TEXT)}>New</span>}
@@ -56,7 +56,7 @@ export default function ApartmentCard({ apartment }) {
       </div>
 
       <div className="p-4">
-        <p className="text-[11px] font-semibold" style={{ color: c.MUTED }}>{apartment.neighborhood} · {apartment.building_name}</p>
+        <p className="text-[11px] font-semibold" style={{ color: c.MUTED }}>{apartment.apt_type} in {apartment.neighborhood}, Philadelphia</p>
         <h3 className="mt-1 line-clamp-1 text-[17px] font-bold" style={{ color: c.TEXT }}>{apartment.title}</h3>
         <div className="mt-2 flex flex-wrap items-center gap-3 text-[13px]" style={{ color: c.MUTED }}>
           <span className="flex items-center gap-1"><BedDouble size={15} /> {apartment.bedrooms === 0 ? "Studio" : `${apartment.bedrooms} bd`}</span>

@@ -67,6 +67,7 @@ def stable_id(kind: str, slug: str) -> str:
 BUILDINGS = [
     {
         "slug": "broad-and-noble",
+        "public_area": "North Broad",
         "name": "Broad + Noble",
         "address": "435 N Broad St",
         "neighborhood": "Callowhill",
@@ -86,6 +87,7 @@ BUILDINGS = [
     },
     {
         "slug": "the-hannah",
+        "public_area": "Callowhill",
         "name": "The Hannah",
         "address": "1306 Callowhill St",
         "neighborhood": "Callowhill",
@@ -105,6 +107,7 @@ BUILDINGS = [
     },
     {
         "slug": "edgewater-2",
+        "public_area": "Logan Square",
         "name": "Edgewater II",
         "address": "2323 Race St",
         "neighborhood": "Logan Square",
@@ -125,6 +128,7 @@ BUILDINGS = [
     },
     {
         "slug": "1500-locust",
+        "public_area": "Rittenhouse Square",
         "name": "1500 Locust",
         "address": "1500 Locust St",
         "neighborhood": "Rittenhouse Square",
@@ -368,7 +372,10 @@ def build_portfolio():
                 {
                     "id": listing_id,
                     "building_id": building_id,
-                    "title": f"{raw['name']} {bedroom_word}",
+                    # Guests see where the home is, never which building it is
+                    # in; the building name stays operator-facing.
+                    "title": f"{raw['public_area']} {bedroom_word}",
+                    "public_area": raw["public_area"],
                     "building_name": raw["name"],
                     "neighborhood": raw["neighborhood"],
                     "city": "Philadelphia, PA",

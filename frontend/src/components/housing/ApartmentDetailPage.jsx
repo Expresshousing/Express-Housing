@@ -41,11 +41,11 @@ const PURPOSES = [{ value: "business", label: "Business travel" }, { value: "med
 
 const pendingBookingKey = (apartmentId) => `eh_pending_booking_${apartmentId}`;
 
-const BUILDING_CONTEXT = {
-  "Broad + Noble": "A North Broad Street address in Callowhill with a direct connection to Center City Philadelphia.",
-  "The Hannah": "A Callowhill address designed for an easy Philadelphia stay near the North Broad Street corridor.",
-  "Edgewater II": "A Logan Square address near the Schuylkill riverfront and central Philadelphia.",
-  "1500 Locust": "A Rittenhouse Square address in the center of Philadelphia's dining, business, and cultural district.",
+const AREA_CONTEXT = {
+  "North Broad": "On the North Broad Street corridor in Callowhill, with a direct connection into Center City Philadelphia.",
+  Callowhill: "In Callowhill, an easy Philadelphia base a short walk from the North Broad Street corridor.",
+  "Logan Square": "In Logan Square, near the Schuylkill riverfront and central Philadelphia.",
+  "Rittenhouse Square": "In Rittenhouse Square, at the centre of Philadelphia's dining, business and cultural district.",
 };
 
 function ToneNotice({ color, children, testId }) {
@@ -220,7 +220,7 @@ export default function ApartmentDetailPage() {
     return portfolioApartments
       .filter((item) => item.id !== apt.id)
       .sort((a, b) => {
-        const score = (item) => (item.building_name === apt.building_name ? 2 : item.neighborhood === apt.neighborhood ? 1 : 0);
+        const score = (item) => (item.building_id === apt.building_id ? 2 : item.neighborhood === apt.neighborhood ? 1 : 0);
         return score(b) - score(a);
       })
       .slice(0, 3);
@@ -231,7 +231,7 @@ export default function ApartmentDetailPage() {
   const roomTypeOptions = useMemo(() => {
     if (!apt) return [];
     return portfolioApartments
-      .filter((item) => item.building_name === apt.building_name)
+      .filter((item) => item.building_id === apt.building_id)
       .sort((a, b) => a.bedrooms - b.bedrooms);
   }, [apt, portfolioApartments]);
 
@@ -295,7 +295,8 @@ export default function ApartmentDetailPage() {
   if (!apt) return <div className="py-32 text-center" style={pageStyle(c)}><div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-t-transparent" style={{ borderColor: `${c.BLUE}33`, borderTopColor: c.BLUE }} /></div>;
 
   const saved = wishlistIds.includes(apt.id);
-  const buildingContext = BUILDING_CONTEXT[apt.building_name] || `${apt.building_name} is in ${apt.neighborhood}, Philadelphia.`;
+  const areaLabel = apt.public_area || apt.neighborhood;
+  const buildingContext = AREA_CONTEXT[areaLabel] || `In ${apt.neighborhood}, Philadelphia.`;
   const queryString = searchParams.toString();
   const homeOffers = [
     { icon: Armchair, title: "Fully furnished home", description: "Furniture, layout, view, and finishes are confirmed for the assigned apartment." },
@@ -307,7 +308,7 @@ export default function ApartmentDetailPage() {
   ];
   const stayHighlights = [
     { icon: Users, title: "Room to settle in", description: `${apt.bedrooms === 0 ? "Studio" : `${apt.bedrooms} bedroom${apt.bedrooms === 1 ? "" : "s"}`} for up to ${apt.max_guests} registered guests.` },
-    { icon: Building2, title: "Professionally managed", description: `A furnished Express Housing stay inside ${apt.building_name}.` },
+    { icon: Building2, title: "Professionally managed", description: "A furnished Express Housing stay in a professionally managed building." },
     { icon: ShieldCheck, title: "Review before payment", description: "Dates, fees, policies, and the amount due are shown before a payment step." },
   ];
   const openGallery = (index = mainImg) => {
@@ -341,7 +342,7 @@ export default function ApartmentDetailPage() {
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center p-10 text-center">
             <div style={iconTileStyle("#FFFFFF", 56, 16)}><ImageIcon size={24} /></div>
-            <p className="mt-4 text-[20px] font-bold text-white">{apt.building_name}</p>
+            <p className="mt-4 text-[20px] font-bold text-white">{apt.public_area || apt.neighborhood}</p>
             <p className="mt-2 max-w-sm text-[13px] text-white/70">Verified unit photography is coming soon.</p>
           </div>
         )}
@@ -365,7 +366,7 @@ export default function ApartmentDetailPage() {
         )}
 
         <div className="eh-container pointer-events-none absolute inset-x-0 bottom-0 pb-10 md:pb-14">
-          <p className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.18em] text-white/80"><MapPin size={15} /> {apt.neighborhood} · {apt.building_name}</p>
+          <p className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.18em] text-white/80"><MapPin size={15} /> {apt.apt_type} in {apt.neighborhood}, Philadelphia</p>
           <h1 className="mt-5 max-w-4xl text-[46px] font-extrabold leading-[0.94] text-white sm:text-[60px] md:text-[76px]">{apt.title}</h1>
           <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px] font-semibold text-white/80">
             <span>{apt.review_count > 0 ? <><Star size={14} color={c.ORANGE} fill={c.ORANGE} className="mr-1 inline" />{apt.rating} ({apt.review_count} reviews)</> : "New Express Housing inventory"}</span>
@@ -462,7 +463,7 @@ export default function ApartmentDetailPage() {
             </div>
           </DetailSection>
 
-          <DetailSection id="building-amenities" eyebrow="Building features" title="Amenities at a glance" description={`${apt.amenities?.length || 0} amenities currently listed for ${apt.building_name}. Availability and operating hours may change.`} c={c}>
+          <DetailSection id="building-amenities" eyebrow="Building features" title="Amenities at a glance" description={`${apt.amenities?.length || 0} amenities currently listed for this building. Availability and operating hours may change.`} c={c}>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {apt.amenities?.map((amenity) => (
                 <div key={amenity} className="flex min-h-14 items-center gap-3 rounded-[14px] p-3" style={{ background: c.CARD, border: `1px solid ${c.BORDER}` }}>
@@ -484,8 +485,9 @@ export default function ApartmentDetailPage() {
               </div>
               <div className="border-t p-4" style={{ borderColor: c.BORDER }}>
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: c.MUTED }}>Public building address</p>
-                  <p className="mt-1 text-[13px] font-bold" style={{ color: c.TEXT }}>{apt.address} · Philadelphia, PA</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: c.MUTED }}>Where you'll be</p>
+                  <p className="mt-1 text-[13px] font-bold" style={{ color: c.TEXT }}>{apt.neighborhood} · Philadelphia, PA</p>
+                  <p className="mt-2 text-[12px] leading-relaxed" style={{ color: c.MUTED }}>The exact address and access details are shared once your reservation is confirmed.</p>
                 </div>
               </div>
             </div>
