@@ -305,6 +305,12 @@ BUILDING_IMAGES = {
 }
 
 
+# Building name -> the area label guests see. Kept here beside the raw data so
+# the two cannot disagree, and used to backfill records saved before the field
+# existed.
+PUBLIC_AREA_BY_BUILDING = {raw["name"]: raw["public_area"] for raw in BUILDINGS}
+
+
 def build_portfolio():
     buildings = []
     units = []

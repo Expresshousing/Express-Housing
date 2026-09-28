@@ -20,7 +20,7 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 from cryptography.fernet import Fernet, InvalidToken
 
-from backend.app.fixtures.portfolio import INTEGRATION_SETUP, PORTFOLIO_VERSION, build_portfolio
+from backend.app.fixtures.portfolio import INTEGRATION_SETUP, PORTFOLIO_VERSION, PUBLIC_AREA_BY_BUILDING, build_portfolio
 from backend.app.services.pricing import NIGHTLY_RATES, calculate_quote, update_apartment_nightly_rates
 
 ROOT_DIR = Path(__file__).parent
@@ -85,6 +85,9 @@ class ApartmentBase(BaseModel):
     title: str
     building_name: str
     neighborhood: str
+    # The area a guest sees. Distinct from neighborhood so two properties in
+    # one neighborhood stay separable without naming either of them.
+    public_area: str = ""
     city: str = "Philadelphia, PA"
     address: str = ""
     apt_type: str  # Studio, 1 Bedroom, 2 Bedroom, 3 Bedroom, Penthouse
@@ -505,7 +508,16 @@ PRIVATE_LISTING_FIELDS = ("building_name", "address", "official_website", "ameni
 
 
 def public_listing(listing: dict) -> dict:
-    return {key: value for key, value in listing.items() if key not in PRIVATE_LISTING_FIELDS}
+    public = {key: value for key, value in listing.items() if key not in PRIVATE_LISTING_FIELDS}
+    # Derived from the building name before it is dropped, so a listing stored
+    # without public_area still resolves to the right area rather than falling
+    # back to a neighborhood two buildings share.
+    public["public_area"] = (
+        listing.get("public_area")
+        or PUBLIC_AREA_BY_BUILDING.get(listing.get("building_name", ""))
+        or listing.get("neighborhood", "")
+    )
+    return public
 
 
 @api_router.get("/buildings")

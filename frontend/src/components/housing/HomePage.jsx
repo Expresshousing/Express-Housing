@@ -161,7 +161,7 @@ export default function HomePage() {
                 viewport={{ once: true, margin: "-10%" }}
                 transition={{ duration: 0.7, delay: (index % 4) * 0.08, ease: [0.16, 1, 0.3, 1] }}
               >
-                <Link to={building.listingId ? `/apartments/${building.listingId}` : `/?area=${encodeURIComponent(building.area)}#stay-planner`} className="group block" aria-label={`View furnished apartments in ${building.area}`}>
+                <Link to={building.listingId ? `/apartments/${building.listingId}` : "/#stay-planner"} className="group block" aria-label={`View furnished apartments in ${building.area}`}>
                   <div className={`relative overflow-hidden rounded-[18px] ${index % 2 === 0 ? "aspect-[4/3]" : "aspect-[5/4]"}`}>
                     <img src={building.image} alt={`A furnished Express Housing home in ${building.area}`} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" style={{ objectPosition: building.imagePosition }} loading="lazy" decoding="async" />
                     <span className="absolute left-5 top-5 flex h-9 min-w-9 items-center justify-center rounded-full bg-white px-3 text-[10px] font-extrabold text-black">0{index + 1}</span>

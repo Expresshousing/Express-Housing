@@ -703,3 +703,40 @@ def test_public_listings_never_name_the_building_or_its_address():
         # Operations still see everything they need.
         admin_buildings = client.get("/api/admin/portfolio", headers=headers).json()["buildings"]
         assert all(b.get("name") and b.get("address") for b in admin_buildings)
+
+
+def test_every_listing_carries_an_area_that_identifies_one_building():
+    with TestClient(server.app) as client:
+        headers = admin_headers(client)
+        assert client.post("/api/seed", headers=headers).status_code == 200
+        listings = [l for l in client.get("/api/apartments").json() if l.get("portfolio_seed")]
+        assert listings
+
+        # Without this the homepage cards fall back to neighborhood, where two
+        # buildings collide: one card opens the other's apartment and the card
+        # for the building that lost the match links nowhere.
+        assert all(l["public_area"] for l in listings), "a listing reached the client with no area"
+
+        by_area = {}
+        for listing in listings:
+            by_area.setdefault(listing["public_area"], set()).add(listing["building_id"])
+        for area, building_ids in by_area.items():
+            assert len(building_ids) == 1, f"area {area!r} spans {len(building_ids)} buildings"
+
+        buildings = client.get("/api/admin/portfolio", headers=headers).json()["buildings"]
+        assert len(by_area) == len(buildings), "every building needs its own area label"
+
+
+def test_area_is_filled_in_for_a_listing_saved_before_the_field_existed():
+    # Records written by an older build have no public_area; they must still
+    # resolve to the right area rather than to a shared neighborhood.
+    from backend.app.fixtures.portfolio import build_portfolio
+
+    _, _, listings = build_portfolio()
+    legacy = {k: v for k, v in listings[0].items() if k != "public_area"}
+    assert legacy["building_name"] == "Broad + Noble"
+    assert legacy["neighborhood"] == "Callowhill"
+
+    public = server.public_listing(legacy)
+    assert public["public_area"] == "North Broad"
+    assert "building_name" not in public
